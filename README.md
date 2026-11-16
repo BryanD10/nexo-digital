@@ -2,31 +2,41 @@
 
 Sitio estático en español hecho con HTML, CSS y JavaScript, sin instalar dependencias.
 
-## Ver el sitio en vivo
+> Este repositorio es **independiente** de cualquier otro dominio (incluyendo masterfumigacioneswd.com). Es el código fuente propio de Nexo Digital.
 
-Una vez habilitado GitHub Pages (Settings → Pages → Source: Deploy from a branch → main / root), el sitio estará en:
+## Ver el sitio en vivo (GitHub Pages)
+
+1. Ve a **Settings → Pages**
+2. Source: **Deploy from a branch**
+3. Branch: **main** / folder: **/ (root)**
+4. Guarda
+
+El sitio quedará en:
 
 **https://bryand10.github.io/nexo-digital/**
 
-## Abrir en tu computadora
-
-1. Clona el repositorio o descarga el ZIP.
-2. Abre una terminal dentro de la carpeta.
-3. Ejecuta: `python3 -m http.server 8000`
-4. En tu navegador, visita `http://localhost:8000`.
-
 ## Archivos principales
 
-- `index.html`: textos, secciones y contenido del sitio.
-- `styles.css`: colores, diseño y adaptación a celular.
-- `script.js`: menú móvil, año del pie y comportamiento del formulario.
-- `site-config.js`: correo o WhatsApp del negocio.
-- `assets/`: ilustraciones utilizadas en la página.
-- `favicon.svg`: icono del sitio.
+- `index.html` – textos y estructura
+- `styles.css` – diseño completo
+- `script.js` – menú móvil y formulario
+- `site-config.js` – correo o WhatsApp
+- `assets/` – imágenes (sube `hero-systems.webp` y `process-flow.webp` aquí)
+- `favicon.svg`
+
+## Completar las imágenes
+
+Para que se vean las ilustraciones:
+
+1. Entra al repo → **Add file → Upload files**
+2. Arrastra desde el ZIP original:
+   - `public/assets/hero-systems.webp`
+   - `public/assets/process-flow.webp`
+3. Ponlos dentro de la carpeta `assets/`
 
 ## Configurar el contacto
 
-Antes de publicar, abre `site-config.js` y llena **solo una** opción con datos reales:
+Edita `site-config.js` y pon **solo una** opción real:
 
 ```js
 window.NEXO_CONFIG = {
@@ -35,7 +45,7 @@ window.NEXO_CONFIG = {
 };
 ```
 
-O bien configura WhatsApp con el prefijo internacional y solo dígitos (sin `+`, espacios ni guiones), por ejemplo `5215512345678`:
+o
 
 ```js
 window.NEXO_CONFIG = {
@@ -44,4 +54,10 @@ window.NEXO_CONFIG = {
 };
 ```
 
-El formulario prepara un borrador en la aplicación de correo o abre WhatsApp; no almacena ni envía los datos a una base de datos.
+## Abrir en local
+
+```bash
+python3 -m http.server 8000
+```
+
+Luego abre http://localhost:8000
