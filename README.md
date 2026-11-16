@@ -36,6 +36,18 @@ El robot ofrece atajos hacia el formulario; no es un chatbot ni una IA.
 
 La ventana muestra la captura ampliada; no ejecuta el sitio del proyecto dentro de la página. Presenta ejemplos conceptuales como demos y muestra proyectos de clientes solo con autorización y sin datos privados.
 
+## Demos interactivas
+
+La sección **Ejemplos visuales** abre cinco demos funcionales desde el botón «Probar demo». Cada una es una página independiente en `demos/`, con datos inventados y una cinta que lo aclara:
+
+- `demos/clientes.html`: registro de pedidos con búsqueda, filtros, cambio de estado y alta de pedidos.
+- `demos/facturas.html`: facturas con cobros pendientes, vencidas y pagadas, y vista previa de la factura.
+- `demos/escritorio.html`: programa de escritorio con tablero de trabajos y agenda semanal.
+- `demos/reportes.html`: reporte de ventas con periodo, categorías, gráfico y vista de tabla.
+- `demos/web.html`: página de un estudio ficticio, con alternador escritorio/móvil.
+
+`demos/demo.css` comparte la base visual. Para agregar otra demo: crea el HTML en `demos/` y añade `data-demo="demos/tu-demo.html"` al `<article class="project-card">`; `script.js` agrega el botón solo.
+
 ## Configurar el contacto
 
 Edita `site-config.js` con **un solo** canal real. Para correo:

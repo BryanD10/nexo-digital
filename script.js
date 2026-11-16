@@ -68,6 +68,33 @@
     });
   }
 
+  const demoModal = document.querySelector('#demo-modal');
+  const demoFrame = document.querySelector('#demo-frame');
+  const demoTitle = document.querySelector('#demo-modal-title');
+  const demoNewTab = document.querySelector('#demo-newtab');
+  let demoOpener = null;
+
+  function openDemo(src, title, opener) {
+    if (!demoModal || !demoFrame) return;
+    demoOpener = opener;
+    demoTitle.textContent = title;
+    demoFrame.title = `Demo interactiva: ${title}`;
+    demoFrame.src = src;
+    if (demoNewTab) demoNewTab.href = src;
+    demoModal.showModal();
+  }
+
+  if (demoModal) {
+    document.querySelector('#demo-close')?.addEventListener('click', () => demoModal.close());
+    demoModal.addEventListener('click', (event) => {
+      if (event.target === demoModal) demoModal.close();
+    });
+    demoModal.addEventListener('close', () => {
+      demoFrame.src = 'about:blank';
+      demoOpener?.focus();
+    });
+  }
+
   const projectModal = document.querySelector('#project-modal');
   const projectModalPreview = document.querySelector('#project-modal-preview');
   const modalTitle = document.querySelector('#project-modal-title');
@@ -87,7 +114,19 @@
       openButton.type = 'button';
       openButton.textContent = 'Ampliar vista previa';
       openButton.setAttribute('aria-label', `Ampliar vista previa: ${title}`);
-      copy.append(openButton);
+      const actions = document.createElement('div');
+      actions.className = 'project-actions';
+      if (card.dataset.demo) {
+        const demoButton = document.createElement('button');
+        demoButton.className = 'demo-open';
+        demoButton.type = 'button';
+        demoButton.textContent = 'Probar demo';
+        demoButton.setAttribute('aria-label', `Probar la demo interactiva: ${title}`);
+        demoButton.addEventListener('click', () => openDemo(card.dataset.demo, title, demoButton));
+        actions.append(demoButton);
+      }
+      actions.append(openButton);
+      copy.append(actions);
 
       openButton.addEventListener('click', () => {
         modalTitle.textContent = title;
