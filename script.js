@@ -185,4 +185,27 @@
       if (event.key === 'Escape' && !assistantPanel.hidden) setAssistantOpen(false, true);
     });
   }
+
+  const contactSelect = document.querySelector('#contact-service');
+  const hasService = (value) => Boolean(contactSelect) && Array.from(contactSelect.options).some((option) => option.value === value);
+  const preselectService = (value) => {
+    if (!hasService(value)) return;
+    contactSelect.value = value;
+    contactSelect.dispatchEvent(new Event('change', { bubbles: true }));
+  };
+
+  window.addEventListener('message', (event) => {
+    if (!demoFrame || event.source !== demoFrame.contentWindow) return;
+    if (event.origin !== window.location.origin) return;
+    const data = event.data;
+    if (!data || data.type !== 'nexo-demo-cta') return;
+
+    demoOpener = null;
+    demoModal?.close();
+    preselectService(String(data.service || ''));
+    document.querySelector('#contacto')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    window.setTimeout(() => contactSelect?.focus({ preventScroll: true }), 450);
+  });
+
+  preselectService(new URLSearchParams(window.location.search).get('servicio') || '');
 })();

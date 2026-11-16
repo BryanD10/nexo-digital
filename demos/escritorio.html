@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="demo.css" />
+  <link rel="stylesheet" href="demo.css?v=20261115" />
   <style>
     body { background: #e9ebe4; }
     .stage { max-width: 1180px; margin: 0 auto; padding: 18px 16px 34px; }
@@ -82,7 +82,7 @@
   <div class="ribbon">
     <span class="ribbon-dot" aria-hidden="true"></span>
     <span class="ribbon-text"><b>Demo conceptual.</b> Así se vería un programa instalado en la computadora. Tareas inventadas.</span>
-    <span class="ribbon-actions"><button type="button" id="reset">Reiniciar demo</button></span>
+    <span class="ribbon-actions"><a class="ribbon-cta" href="../index.html#contacto" data-cta="Aplicación local o de escritorio">Quiero algo así <span aria-hidden="true">↗</span></a><button type="button" id="reset">Reiniciar demo</button></span>
   </div>
 
   <div class="stage">
@@ -214,5 +214,6 @@
     $('#reset').addEventListener('click', () => { init(); setView('board'); });
     init();
   </script>
+  <script src="demo.js?v=20261115"></script>
 </body>
 </html>

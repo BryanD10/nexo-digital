@@ -40,6 +40,14 @@ button { cursor: pointer; }
 .ribbon button:hover { color: var(--navy); background: var(--lime); border-color: var(--lime); }
 .ribbon button[aria-pressed="true"] { color: var(--navy); background: var(--lime); border-color: var(--lime); }
 
+.ribbon a.ribbon-cta { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 0 13px; color: var(--navy); background: var(--lime); border: 1px solid var(--lime); border-radius: 999px; font-size: 11px; font-weight: 700; text-decoration: none; white-space: nowrap; transition: background .15s, transform .15s; }
+.ribbon a.ribbon-cta:hover { background: #b9e456; transform: translateY(-1px); }
+@media (max-width: 560px) {
+  .ribbon { flex-wrap: wrap; row-gap: 6px; }
+  .ribbon-text { flex: 1 1 calc(100% - 24px); }
+  .ribbon-actions { width: 100%; justify-content: flex-end; flex-wrap: wrap; }
+}
+
 /* Botones */
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 16px; color: white; background: var(--navy); border: 1px solid var(--navy); border-radius: 999px; font-size: 13px; font-weight: 700; white-space: nowrap; transition: transform .15s, background .15s, color .15s, border-color .15s; }
 .btn:hover { transform: translateY(-1px); background: #0c1a22; }

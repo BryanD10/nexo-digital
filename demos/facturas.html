@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="demo.css" />
+  <link rel="stylesheet" href="demo.css?v=20261115" />
   <style>
     .app { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 20px; max-width: 1180px; margin: 0 auto; padding: 22px 20px 40px; align-items: start; }
     .left { display: grid; gap: 16px; min-width: 0; }
@@ -65,7 +65,7 @@
   <div class="ribbon">
     <span class="ribbon-dot" aria-hidden="true"></span>
     <span class="ribbon-text"><b>Demo conceptual.</b> Clientes y montos inventados. No es un sistema fiscal certificado.</span>
-    <span class="ribbon-actions"><button type="button" id="reset">Reiniciar demo</button></span>
+    <span class="ribbon-actions"><a class="ribbon-cta" href="../index.html#contacto" data-cta="Sistema de facturación">Quiero algo así <span aria-hidden="true">↗</span></a><button type="button" id="reset">Reiniciar demo</button></span>
   </div>
 
   <main class="app">
@@ -226,5 +226,6 @@
     $('#reset').addEventListener('click', init);
     init();
   </script>
+  <script src="demo.js?v=20261115"></script>
 </body>
 </html>
