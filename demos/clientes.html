@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Demo · Registro de clientes | Nexo Digital</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="demo.css" />
+  <style>
+    .app { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 18px; max-width: 1180px; margin: 0 auto; padding: 22px 20px 40px; align-items: start; }
+    .main { display: grid; gap: 16px; min-width: 0; }
+    .head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; }
+    .head h1 { font-size: clamp(26px, 4vw, 36px); }
+    .head p { margin-top: 6px; color: var(--muted); }
+    .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+    .search { position: relative; flex: 1 1 220px; }
+    .search svg { position: absolute; left: 13px; top: 50%; width: 17px; height: 17px; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+    .search .input { padding-left: 40px; }
+    .table-card { overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    th { padding: 12px 16px; color: var(--muted); font-size: 12px; font-weight: 600; text-align: left; background: var(--paper-bright); border-bottom: 1px solid var(--line); }
+    td { padding: 12px 16px; border-bottom: 1px solid #edeee8; vertical-align: middle; }
+    tbody tr { cursor: pointer; transition: background .12s; }
+    tbody tr:hover { background: var(--paper-bright); }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr.is-selected { background: var(--blue-soft); }
+    tbody tr:focus-visible { outline-offset: -3px; }
+    .who { display: flex; align-items: center; gap: 11px; }
+    .avatar { width: 34px; height: 34px; flex: 0 0 34px; display: grid; place-items: center; color: var(--navy); background: var(--lime); border-radius: 50%; font-family: var(--font-display); font-size: 13px; font-weight: 700; }
+    .who b { display: block; font-weight: 600; }
+    .who small { color: var(--muted); font-size: 12px; }
+    td.num { color: var(--muted); font-variant-numeric: tabular-nums; }
+    .side { position: sticky; top: 56px; padding: 20px; display: grid; gap: 16px; }
+    .side h2 { font-size: 22px; }
+    .side .placeholder { color: var(--muted); }
+    .detail-top { display: flex; align-items: center; gap: 12px; }
+    .detail-top .avatar { width: 46px; height: 46px; flex-basis: 46px; font-size: 16px; }
+    .facts { display: grid; gap: 0; margin: 0; }
+    .facts div { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid #edeee8; font-size: 13px; }
+    .facts dt { color: var(--muted); }
+    .facts dd { margin: 0; font-weight: 600; text-align: right; }
+    .steps { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+    .steps li { position: relative; display: flex; align-items: center; gap: 11px; padding: 7px 0; color: var(--muted); font-size: 13px; }
+    .steps li::before { content: ''; width: 12px; height: 12px; flex: 0 0 12px; border: 2px solid var(--line); border-radius: 50%; background: white; }
+    .steps li.is-done { color: var(--ink); }
+    .steps li.is-done::before { border-color: var(--ok); background: var(--ok); }
+    .steps li.is-now { color: var(--ink); font-weight: 700; }
+    .steps li.is-now::before { border-color: var(--blue); background: white; box-shadow: 0 0 0 3px var(--blue-soft); }
+    .note { padding: 11px 13px; color: var(--muted); background: var(--paper); border-radius: 12px; font-size: 12px; }
+    @media (max-width: 900px) {
+      .app { grid-template-columns: 1fr; padding: 16px 12px 34px; }
+      .side { position: static; }
+    }
+    @media (max-width: 560px) {
+      .kpis { gap: 8px; }
+      .kpi { padding: 12px; }
+      .kpi b { font-size: 24px; }
+      th:nth-child(3), td:nth-child(3) { display: none; }
+      th, td { padding: 11px 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="ribbon">
+    <span class="ribbon-dot" aria-hidden="true"></span>
+    <span class="ribbon-text"><b>Demo conceptual.</b> Los nombres y pedidos son inventados.</span>
+    <span class="ribbon-actions"><button type="button" id="reset">Reiniciar demo</button></span>
+  </div>
+
+  <main class="app">
+    <div class="main">
+      <header class="head">
+        <div>
+          <h1>Pedidos y clientes</h1>
+          <p>Busca a una persona, mira en qué va su pedido y cambia el estado con un clic.</p>
+        </div>
+        <button class="btn btn-lime" type="button" id="open-new">+ Nuevo pedido</button>
+      </header>
+
+      <section class="kpis" aria-label="Resumen">
+        <div class="card kpi"><i>Registros</i><b id="k-total">0</b><small>pedidos guardados</small></div>
+        <div class="card kpi"><i>Por revisar</i><b id="k-new">0</b><small>esperan respuesta</small></div>
+        <div class="card kpi"><i>Listos</i><b id="k-done">0</b><small>para entregar</small></div>
+      </section>
+
+      <div class="toolbar">
+        <label class="search">
+          <span class="sr-only">Buscar por cliente o pedido</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input class="input" id="q" type="search" placeholder="Buscar por cliente o pedido" autocomplete="off" />
+        </label>
+        <div class="chips" id="filters" role="group" aria-label="Filtrar por estado"></div>
+      </div>
+
+      <section class="card table-card" aria-label="Lista de pedidos">
+        <table>
+          <thead><tr><th scope="col">Cliente</th><th scope="col">Pedido</th><th scope="col">Fecha</th><th scope="col">Estado</th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+        <div class="empty" id="empty" hidden><b>No hay pedidos con ese filtro.</b><span>Prueba con otro nombre o cambia el estado.</span></div>
+      </section>
+    </div>
+
+    <aside class="card side" id="side" aria-live="polite"></aside>
+  </main>
+
+  <dialog class="sheet" id="new-dialog" aria-labelledby="new-title">
+    <form method="dialog" id="new-form">
+      <h2 id="new-title">Nuevo pedido</h2>
+      <label class="field">Nombre del cliente<input class="input" name="name" required placeholder="Ej. Lucía Hernández" autocomplete="off" /></label>
+      <label class="field">¿Qué pidió?<input class="input" name="item" required placeholder="Ej. Estante de madera" autocomplete="off" /></label>
+      <label class="field">Teléfono (opcional)<input class="input" name="phone" placeholder="0000-0000" autocomplete="off" /></label>
+      <div class="sheet-actions">
+        <button class="btn btn-ghost" type="button" id="cancel-new">Cancelar</button>
+        <button class="btn" type="submit" value="ok">Guardar pedido</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const STATES = ['Nuevo', 'En curso', 'Listo'];
+    const BADGE = { 'Nuevo': 'badge-blue', 'En curso': 'badge-warn', 'Listo': 'badge-ok' };
+    const MONTHS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+
+    const seed = [
+      ['Ana Martínez', 'Mesa de centro', '2026-11-13', 'Nuevo', '7000-0114'],
+      ['Taller Los Pinos', 'Marcos de ventana (6)', '2026-11-12', 'En curso', '7000-0173'],
+      ['Carlos Rivas', 'Puerta de closet', '2026-11-11', 'En curso', '7000-0128'],
+      ['Mariela Quintanilla', 'Estante de madera', '2026-11-10', 'Listo', '7000-0155'],
+      ['Casa Verde', 'Bancas para terraza (4)', '2026-11-09', 'Nuevo', '7000-0191'],
+      ['Jorge Cañas', 'Reparación de silla', '2026-11-08', 'Listo', '7000-0137'],
+      ['Sofía Alvarado', 'Escritorio a medida', '2026-11-07', 'En curso', '7000-0182'],
+      ['Distribuidora Luna', 'Tarimas (20)', '2026-11-06', 'Listo', '7000-0120'],
+      ['Mateo Flores', 'Repisas flotantes (3)', '2026-11-05', 'Nuevo', '7000-0166'],
+      ['Elena Portillo', 'Cama de madera', '2026-11-04', 'En curso', '7000-0149'],
+      ['Café del Parque', 'Barra de servicio', '2026-11-02', 'Listo', '7000-0102'],
+      ['Diego Menjívar', 'Gabinete de baño', '2026-11-01', 'Nuevo', '7000-0176'],
+    ];
+
+    let orders, nextId, selected, filter, query;
+
+    const $ = (s) => document.querySelector(s);
+    const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const norm = (t) => String(t).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    const initials = (n) => n.split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+    const fmtDate = (iso) => { const [, m, d] = iso.split('-'); return `${Number(d)} ${MONTHS[Number(m) - 1]}`; };
+    const pad = (n) => String(n).padStart(3, '0');
+
+    function init() {
+      orders = seed.map((s, i) => ({ id: 128 - i, name: s[0], item: s[1], date: s[2], state: s[3], phone: s[4] }));
+      nextId = 129;
+      selected = null;
+      filter = 'Todos';
+      query = '';
+      $('#q').value = '';
+      render();
+    }
+
+    function toast(msg) {
+      const el = $('#toast');
+      el.textContent = msg;
+      el.classList.add('is-on');
+      clearTimeout(toast.t);
+      toast.t = setTimeout(() => el.classList.remove('is-on'), 2200);
+    }
+
+    function visible() {
+      const q = norm(query.trim());
+      return orders.filter((o) => (filter === 'Todos' || o.state === filter) && (!q || norm(o.name + ' ' + o.item).includes(q)));
+    }
+
+    function renderFilters() {
+      const counts = { Todos: orders.length };
+      STATES.forEach((s) => { counts[s] = orders.filter((o) => o.state === s).length; });
+      $('#filters').innerHTML = ['Todos', ...STATES].map((f) =>
+        `<button class="chip" type="button" data-f="${f}" aria-pressed="${f === filter}">${f}<span class="count">${counts[f]}</span></button>`).join('');
+    }
+
+    function renderRows() {
+      const list = visible();
+      $('#rows').innerHTML = list.map((o) => `
+        <tr tabindex="0" data-id="${o.id}" class="${o.id === selected ? 'is-selected' : ''}" aria-label="Ver detalle de ${esc(o.name)}">
+          <td><div class="who"><span class="avatar" aria-hidden="true">${esc(initials(o.name))}</span><div><b>${esc(o.name)}</b><small>#${pad(o.id)}</small></div></div></td>
+          <td>${esc(o.item)}</td>
+          <td class="num">${fmtDate(o.date)}</td>
+          <td><button class="badge ${BADGE[o.state]}" type="button" data-cycle="${o.id}" title="Cambiar estado" aria-label="Estado: ${o.state}. Cambiar estado de ${esc(o.name)}">${o.state}</button></td>
+        </tr>`).join('');
+      $('#empty').hidden = list.length > 0;
+      $('.table-card table').hidden = list.length === 0;
+    }
+
+    function renderKpis() {
+      $('#k-total').textContent = orders.length;
+      $('#k-new').textContent = String(orders.filter((o) => o.state === 'Nuevo').length).padStart(2, '0');
+      $('#k-done').textContent = String(orders.filter((o) => o.state === 'Listo').length).padStart(2, '0');
+    }
+
+    function renderSide() {
+      const o = orders.find((x) => x.id === selected);
+      if (!o) {
+        $('#side').innerHTML = `<h2>Detalle del pedido</h2><p class="placeholder">Elige un pedido de la lista para ver quién lo pidió, su teléfono y en qué paso va.</p><p class="note">Todo lo que ves aquí está guardado en un solo lugar, sin buscar entre libretas u hojas sueltas.</p>`;
+        return;
+      }
+      const idx = STATES.indexOf(o.state);
+      const labels = ['Pedido recibido', 'Se está preparando', 'Listo para entregar'];
+      $('#side').innerHTML = `
+        <div class="detail-top"><span class="avatar" aria-hidden="true">${esc(initials(o.name))}</span><div><h2>${esc(o.name)}</h2><small style="color:var(--muted)">Pedido #${pad(o.id)}</small></div></div>
+        <dl class="facts">
+          <div><dt>Pedido</dt><dd>${esc(o.item)}</dd></div>
+          <div><dt>Fecha</dt><dd>${fmtDate(o.date)}</dd></div>
+          <div><dt>Teléfono</dt><dd>${esc(o.phone || 'Sin registrar')}</dd></div>
+          <div><dt>Estado</dt><dd><span class="badge ${BADGE[o.state]}">${o.state}</span></dd></div>
+        </dl>
+        <ol class="steps" aria-label="Avance del pedido">${labels.map((l, i) => `<li class="${i < idx ? 'is-done' : i === idx ? 'is-now' : ''}">${l}</li>`).join('')}</ol>
+        <button class="btn btn-sm ${idx === 2 ? 'btn-ghost' : ''}" type="button" data-advance="${o.id}">${idx === 2 ? 'Reabrir pedido' : idx === 0 ? 'Empezar a preparar' : 'Marcar como listo'}</button>`;
+    }
+
+    function render() { renderFilters(); renderRows(); renderKpis(); renderSide(); }
+
+    function advance(id) {
+      const o = orders.find((x) => x.id === id);
+      if (!o) return;
+      o.state = STATES[(STATES.indexOf(o.state) + 1) % STATES.length];
+      toast(`Pedido #${pad(o.id)} · ${o.state}`);
+      render();
+    }
+
+    $('#filters').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-f]');
+      if (!b) return;
+      filter = b.dataset.f;
+      render();
+    });
+    $('#q').addEventListener('input', (e) => { query = e.target.value; renderRows(); });
+    $('#rows').addEventListener('click', (e) => {
+      const cyc = e.target.closest('[data-cycle]');
+      if (cyc) { e.stopPropagation(); advance(Number(cyc.dataset.cycle)); return; }
+      const tr = e.target.closest('tr[data-id]');
+      if (tr) { selected = Number(tr.dataset.id); renderRows(); renderSide(); }
+    });
+    $('#rows').addEventListener('keydown', (e) => {
+      if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('tr[data-id]')) {
+        e.preventDefault();
+        selected = Number(e.target.dataset.id);
+        renderRows(); renderSide();
+        $(`tr[data-id="${selected}"]`)?.focus();
+      }
+    });
+    $('#side').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-advance]');
+      if (b) { advance(Number(b.dataset.advance)); }
+    });
+
+    const dlg = $('#new-dialog');
+    $('#open-new').addEventListener('click', () => { $('#new-form').reset(); dlg.showModal(); });
+    $('#cancel-new').addEventListener('click', () => dlg.close());
+    $('#new-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const f = new FormData(e.target);
+      const name = String(f.get('name')).trim();
+      const item = String(f.get('item')).trim();
+      if (!name || !item) return;
+      orders.unshift({ id: nextId, name, item, date: '2026-11-15', state: 'Nuevo', phone: String(f.get('phone')).trim() });
+      selected = nextId++;
+      filter = 'Todos';
+      query = '';
+      $('#q').value = '';
+      dlg.close();
+      render();
+      toast('Pedido guardado');
+    });
+    $('#reset').addEventListener('click', init);
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Demo · Facturas y pagos | Nexo Digital</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="demo.css" />
+  <style>
+    .app { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 20px; max-width: 1180px; margin: 0 auto; padding: 22px 20px 40px; align-items: start; }
+    .left { display: grid; gap: 16px; min-width: 0; }
+    .head h1 { font-size: clamp(26px, 4vw, 36px); }
+    .head p { margin-top: 6px; color: var(--muted); }
+    .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .kpi b { font-size: 26px; }
+    .kpi.is-alert b { color: var(--bad); }
+    .list { overflow: hidden; }
+    .inv { display: grid; grid-template-columns: 1fr auto; gap: 4px 14px; width: 100%; padding: 14px 18px; text-align: left; background: transparent; border: 0; border-bottom: 1px solid #edeee8; transition: background .12s; }
+    .inv:last-child { border-bottom: 0; }
+    .inv:hover { background: var(--paper-bright); }
+    .inv[aria-current="true"] { background: var(--blue-soft); }
+    .inv-id { font-family: var(--font-display); font-size: 15px; font-weight: 700; letter-spacing: -.02em; }
+    .inv-client { grid-column: 1; color: var(--muted); font-size: 13px; }
+    .inv-amount { grid-row: 1; grid-column: 2; justify-self: end; font-family: var(--font-display); font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .inv .badge { grid-row: 2; grid-column: 2; justify-self: end; }
+    .inv-due { grid-column: 1; color: var(--muted); font-size: 12px; }
+    .right { position: sticky; top: 56px; min-width: 0; }
+    .sheet-wrap { position: relative; padding: 6px; }
+    .invoice { position: relative; padding: 28px; background: white; border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 18px 50px rgba(20,38,48,.10); }
+    .invoice-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding-bottom: 20px; border-bottom: 2px solid var(--ink); }
+    .invoice-top h2 { font-size: 30px; }
+    .invoice-top small { display: block; margin-top: 6px; color: var(--muted); }
+    .logo { display: grid; place-items: center; width: 44px; height: 44px; color: white; background: var(--navy); border-radius: 12px; font-family: var(--font-display); font-weight: 700; }
+    .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 18px 0; font-size: 13px; }
+    .meta small { display: block; color: var(--muted); font-size: 11.5px; margin-bottom: 2px; }
+    .meta b { font-weight: 600; }
+    .lines { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .lines th { padding: 9px 0; color: var(--muted); font-size: 11.5px; font-weight: 600; text-align: left; border-bottom: 1px solid var(--line); }
+    .lines td { padding: 10px 0; border-bottom: 1px solid #edeee8; }
+    .lines .r { text-align: right; font-variant-numeric: tabular-nums; }
+    .totals { display: grid; gap: 7px; margin: 16px 0 0 auto; width: min(260px, 100%); font-size: 13px; }
+    .totals div { display: flex; justify-content: space-between; }
+    .totals .grand { padding-top: 10px; border-top: 2px solid var(--ink); font-family: var(--font-display); font-size: 20px; font-weight: 700; letter-spacing: -.02em; }
+    .stamp { position: absolute; right: 26px; bottom: 112px; padding: 4px 14px; color: var(--ok); border: 3px solid var(--ok); border-radius: 8px; font-family: var(--font-display); font-size: 22px; font-weight: 700; letter-spacing: .06em; transform: rotate(-9deg); opacity: 0; pointer-events: none; }
+    .stamp.is-on { opacity: .9; animation: stamp .28s cubic-bezier(.2, 1.4, .4, 1) both; }
+    @keyframes stamp { from { transform: rotate(-9deg) scale(1.7); opacity: 0; } to { transform: rotate(-9deg) scale(1); opacity: .9; } }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+    .legal { margin-top: 14px; padding: 11px 13px; color: var(--muted); background: var(--paper); border-radius: 12px; font-size: 12px; }
+    @media (max-width: 900px) {
+      .app { grid-template-columns: 1fr; padding: 16px 12px 34px; }
+      .right { position: static; }
+    }
+    @media (max-width: 560px) {
+      .kpis { gap: 8px; }
+      .kpi { padding: 12px; }
+      .kpi b { font-size: 19px; }
+      .invoice { padding: 18px; }
+      .stamp { right: 14px; bottom: 120px; font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="ribbon">
+    <span class="ribbon-dot" aria-hidden="true"></span>
+    <span class="ribbon-text"><b>Demo conceptual.</b> Clientes y montos inventados. No es un sistema fiscal certificado.</span>
+    <span class="ribbon-actions"><button type="button" id="reset">Reiniciar demo</button></span>
+  </div>
+
+  <main class="app">
+    <div class="left">
+      <header class="head">
+        <h1>Facturas y cobros</h1>
+        <p>Mira qué te deben, qué ya se pagó y qué está vencido.</p>
+      </header>
+
+      <section class="kpis" aria-label="Resumen de cobros">
+        <div class="card kpi"><i>Por cobrar</i><b id="k-open">$0</b><small id="k-open-n"></small></div>
+        <div class="card kpi" id="k-late-card"><i>Vencido</i><b id="k-late">$0</b><small id="k-late-n"></small></div>
+        <div class="card kpi"><i>Cobrado</i><b id="k-paid">$0</b><small id="k-paid-n"></small></div>
+      </section>
+
+      <div class="chips" id="filters" role="group" aria-label="Filtrar facturas"></div>
+
+      <section class="card list" id="list" aria-label="Lista de facturas"></section>
+    </div>
+
+    <aside class="right" aria-live="polite"><div class="sheet-wrap" id="preview"></div></aside>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const TODAY = '2026-11-15';
+    const TAX = 0.13;
+    const MONTHS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+    const seed = [
+      { id: 'F-0048', client: 'Estudio Luna', issued: '2026-11-12', due: '2026-11-27', paid: false, lines: [['Diseño de logotipo', 1, 320], ['Papelería básica', 1, 140]] },
+      { id: 'F-0047', client: 'Casa Verde', issued: '2026-11-09', due: '2026-11-24', paid: false, lines: [['Mantenimiento mensual', 1, 85], ['Reporte de ventas', 1, 60]] },
+      { id: 'F-0046', client: 'Taller Los Pinos', issued: '2026-11-03', due: '2026-11-10', paid: false, lines: [['Registro de inventario', 1, 450]] },
+      { id: 'F-0045', client: 'Distribuidora Luna', issued: '2026-11-01', due: '2026-11-16', paid: true, lines: [['Página de pedidos', 1, 600], ['Dominio y hosting (1 año)', 1, 55]] },
+      { id: 'F-0044', client: 'Café del Parque', issued: '2026-10-28', due: '2026-11-05', paid: false, lines: [['Menú digital', 1, 180], ['Código QR para mesas', 8, 5]] },
+      { id: 'F-0043', client: 'Ana Martínez', issued: '2026-10-22', due: '2026-11-06', paid: true, lines: [['Asesoría de orden', 3, 40]] },
+      { id: 'F-0042', client: 'Sofía Alvarado', issued: '2026-10-18', due: '2026-11-02', paid: true, lines: [['Control de clientes', 1, 380]] },
+      { id: 'F-0041', client: 'Mateo Flores', issued: '2026-10-10', due: '2026-10-25', paid: true, lines: [['Automatización de avisos', 1, 210]] },
+    ];
+
+    let invoices, filter, selected;
+
+    const $ = (s) => document.querySelector(s);
+    const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const money = (n) => '$' + n.toLocaleString('es-SV', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
+    const money2 = (n) => '$' + n.toLocaleString('es-SV', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmtDate = (iso) => { const [y, m, d] = iso.split('-'); return `${Number(d)} ${MONTHS[Number(m) - 1]} ${y}`; };
+    const sub = (i) => i.lines.reduce((a, l) => a + l[1] * l[2], 0);
+    const total = (i) => sub(i) * (1 + TAX);
+    const status = (i) => (i.paid ? 'Pagada' : i.due < TODAY ? 'Vencida' : 'Pendiente');
+    const BADGE = { Pagada: 'badge-ok', Pendiente: 'badge-warn', Vencida: 'badge-bad' };
+    const daysBetween = (a, b) => Math.round((new Date(b) - new Date(a)) / 86400000);
+
+    function init() { invoices = seed.map((i) => ({ ...i, lines: i.lines.map((l) => [...l]) })); filter = 'Todas'; selected = invoices[2].id; render(); }
+
+    function toast(msg) {
+      const el = $('#toast');
+      el.textContent = msg;
+      el.classList.add('is-on');
+      clearTimeout(toast.t);
+      toast.t = setTimeout(() => el.classList.remove('is-on'), 2200);
+    }
+
+    function renderKpis() {
+      const open = invoices.filter((i) => !i.paid);
+      const late = open.filter((i) => i.due < TODAY);
+      const paid = invoices.filter((i) => i.paid);
+      const sum = (arr) => arr.reduce((a, i) => a + total(i), 0);
+      $('#k-open').textContent = money(Math.round(sum(open)));
+      $('#k-open-n').textContent = `${open.length} factura${open.length === 1 ? '' : 's'}`;
+      $('#k-late').textContent = money(Math.round(sum(late)));
+      $('#k-late-n').textContent = late.length ? `${late.length} para recordar` : 'Todo al día';
+      $('#k-late-card').classList.toggle('is-alert', late.length > 0);
+      $('#k-paid').textContent = money(Math.round(sum(paid)));
+      $('#k-paid-n').textContent = `${paid.length} factura${paid.length === 1 ? '' : 's'}`;
+    }
+
+    function renderFilters() {
+      const count = (f) => (f === 'Todas' ? invoices.length : invoices.filter((i) => status(i) === f).length);
+      $('#filters').innerHTML = ['Todas', 'Pendiente', 'Vencida', 'Pagada'].map((f) =>
+        `<button class="chip" type="button" data-f="${f}" aria-pressed="${f === filter}">${f === 'Pendiente' ? 'Pendientes' : f === 'Vencida' ? 'Vencidas' : f === 'Pagada' ? 'Pagadas' : f}<span class="count">${count(f)}</span></button>`).join('');
+    }
+
+    function renderList() {
+      const list = invoices.filter((i) => filter === 'Todas' || status(i) === filter);
+      if (!list.length) { $('#list').innerHTML = `<div class="empty"><b>No hay facturas en este grupo.</b><span>Cambia el filtro para ver las demás.</span></div>`; return; }
+      $('#list').innerHTML = list.map((i) => {
+        const s = status(i);
+        const late = s === 'Vencida' ? ` · ${daysBetween(i.due, TODAY)} días de atraso` : '';
+        return `<button class="inv" type="button" data-id="${i.id}" aria-current="${i.id === selected}">
+          <span class="inv-id">${i.id}</span><span class="inv-amount">${money2(total(i))}</span>
+          <span class="inv-client">${esc(i.client)}</span><span class="badge ${BADGE[s]}">${s}</span>
+          <span class="inv-due">${i.paid ? 'Emitida ' + fmtDate(i.issued) : 'Vence ' + fmtDate(i.due) + late}</span>
+        </button>`;
+      }).join('');
+    }
+
+    function renderPreview() {
+      const i = invoices.find((x) => x.id === selected);
+      if (!i) { $('#preview').innerHTML = `<div class="card empty"><b>Elige una factura</b><span>Verás el detalle aquí.</span></div>`; return; }
+      const s = status(i);
+      const s1 = sub(i);
+      $('#preview').innerHTML = `
+        <article class="invoice" aria-label="Factura ${i.id}">
+          <div class="invoice-top"><div><h2>Factura ${i.id.replace('F-', '')}</h2><small>Ejemplo ilustrativo</small></div><span class="logo" aria-hidden="true">ND</span></div>
+          <div class="meta">
+            <div><small>Para</small><b>${esc(i.client)}</b></div>
+            <div><small>Estado</small><span class="badge ${BADGE[s]}">${s}</span></div>
+            <div><small>Emitida</small><b>${fmtDate(i.issued)}</b></div>
+            <div><small>Vence</small><b>${fmtDate(i.due)}</b></div>
+          </div>
+          <table class="lines">
+            <thead><tr><th scope="col">Detalle</th><th scope="col" class="r">Cant.</th><th scope="col" class="r">Precio</th><th scope="col" class="r">Importe</th></tr></thead>
+            <tbody>${i.lines.map((l) => `<tr><td>${esc(l[0])}</td><td class="r">${l[1]}</td><td class="r">${money2(l[2])}</td><td class="r">${money2(l[1] * l[2])}</td></tr>`).join('')}</tbody>
+          </table>
+          <div class="totals">
+            <div><span>Subtotal</span><span>${money2(s1)}</span></div>
+            <div><span>Impuesto (13 %, ejemplo)</span><span>${money2(s1 * TAX)}</span></div>
+            <div class="grand"><span>Total</span><span>${money2(s1 * (1 + TAX))}</span></div>
+          </div>
+          <span class="stamp ${i.paid ? 'is-on' : ''}" aria-hidden="true">PAGADA</span>
+        </article>
+        <div class="actions">
+          <button class="btn ${i.paid ? 'btn-ghost' : 'btn-lime'}" type="button" id="toggle-paid">${i.paid ? 'Reabrir factura' : 'Marcar como pagada'}</button>
+          ${s === 'Vencida' ? '<button class="btn btn-ghost" type="button" id="remind">Preparar recordatorio</button>' : ''}
+        </div>
+        <p class="legal">Esta pantalla solo muestra la idea. Antes de usar facturas reales, se revisan los requisitos fiscales de tu país.</p>`;
+    }
+
+    function render() { renderKpis(); renderFilters(); renderList(); renderPreview(); }
+
+    $('#filters').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-f]');
+      if (!b) return;
+      filter = b.dataset.f;
+      const first = invoices.find((i) => filter === 'Todas' || status(i) === filter);
+      if (first && !(invoices.find((i) => i.id === selected && (filter === 'Todas' || status(i) === filter)))) selected = first.id;
+      render();
+    });
+    $('#list').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-id]');
+      if (!b) return;
+      selected = b.dataset.id;
+      renderList(); renderPreview();
+      if (matchMedia('(max-width: 900px)').matches) $('#preview').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    $('#preview').addEventListener('click', (e) => {
+      const i = invoices.find((x) => x.id === selected);
+      if (!i) return;
+      if (e.target.closest('#toggle-paid')) {
+        i.paid = !i.paid;
+        toast(i.paid ? `${i.id} marcada como pagada` : `${i.id} volvió a pendiente`);
+        render();
+        $('#toggle-paid')?.focus();
+      }
+      if (e.target.closest('#remind')) toast(`Recordatorio listo para ${i.client}`);
+    });
+    $('#reset').addEventListener('click', init);
+    init();
+  </script>
+</body>
+</html>

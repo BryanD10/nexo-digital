@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Demo · Reporte de ventas | Nexo Digital</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="demo.css" />
+  <style>
+    .app { display: grid; gap: 16px; max-width: 1180px; margin: 0 auto; padding: 22px 20px 40px; }
+    .head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px; }
+    .head h1 { font-size: clamp(26px, 4vw, 36px); }
+    .head p { margin-top: 6px; color: var(--muted); }
+    .controls { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: center; }
+    .controls .group { display: flex; align-items: center; gap: 10px; }
+    .controls .label { color: var(--muted); font-size: 12px; font-weight: 600; }
+    .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .kpi .delta { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; }
+    .delta.up { color: var(--ok); }
+    .delta.down { color: var(--bad); }
+    .delta.flat { color: var(--muted); }
+    .grid { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+    .panel { padding: 18px 18px 16px; }
+    .panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+    .panel-head h2 { font-size: 19px; }
+    .panel-head p { margin-top: 4px; color: var(--muted); font-size: 12.5px; }
+    .chart { position: relative; width: 100%; }
+    .chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+    .chart text { font-family: var(--font-body); fill: var(--muted); font-size: 11.5px; }
+    .chart .grid-line { stroke: #e7e9e2; stroke-width: 1; }
+    .bar { fill: var(--navy); transition: fill .15s, opacity .15s; cursor: pointer; }
+    .bar.is-cat { fill: var(--blue); }
+    .bar.is-last { fill: var(--lime); stroke: var(--navy); stroke-width: 1.5; }
+    .bar:hover, .bar:focus { opacity: .8; outline: none; }
+    .bar:focus-visible { stroke: var(--coral); stroke-width: 3; }
+    .tip { position: absolute; z-index: 5; min-width: 150px; padding: 9px 12px; color: white; background: var(--navy); border-radius: 12px; font-size: 12px; line-height: 1.45; pointer-events: none; opacity: 0; transform: translate(-50%, -100%); transition: opacity .12s; }
+    .tip.is-on { opacity: 1; }
+    .tip b { display: block; font-family: var(--font-display); font-size: 17px; letter-spacing: -.02em; }
+    .tip span { color: #b9c8cd; }
+    .rank { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
+    .rank button { display: grid; gap: 7px; width: 100%; padding: 10px 10px 11px; text-align: left; background: transparent; border: 1px solid transparent; border-radius: 12px; transition: background .12s, border-color .12s; }
+    .rank button:hover { background: var(--paper-bright); }
+    .rank button[aria-pressed="true"] { background: var(--blue-soft); border-color: #cdd5ff; }
+    .rank .row { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; }
+    .rank .row b { font-weight: 600; }
+    .rank .row span { color: var(--muted); font-variant-numeric: tabular-nums; }
+    .rank .track { height: 8px; overflow: hidden; background: #e8ebe3; border-radius: 99px; }
+    .rank .track i { display: block; height: 100%; background: var(--navy); border-radius: 99px; transition: width .35s ease; }
+    .rank button[aria-pressed="true"] .track i { background: var(--blue); }
+    .tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .tbl th { padding: 9px 8px; color: var(--muted); font-size: 12px; font-weight: 600; text-align: left; border-bottom: 1px solid var(--line); }
+    .tbl td { padding: 9px 8px; border-bottom: 1px solid #edeee8; font-variant-numeric: tabular-nums; }
+    .tbl .r { text-align: right; }
+    [hidden] { display: none !important; }
+    @media (max-width: 900px) {
+      .app { padding: 16px 12px 34px; }
+      .kpis { grid-template-columns: repeat(2, 1fr); }
+      .grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+      .kpi b { font-size: 24px; }
+      .controls .group { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+  <div class="ribbon">
+    <span class="ribbon-dot" aria-hidden="true"></span>
+    <span class="ribbon-text"><b>Demo conceptual.</b> Todas las cifras son inventadas y sirven solo de ejemplo.</span>
+    <span class="ribbon-actions"><button type="button" id="reset">Reiniciar demo</button></span>
+  </div>
+
+  <main class="app">
+    <header class="head">
+      <div>
+        <h1>Cómo van tus ventas</h1>
+        <p>Cambia el periodo o elige una categoría y el reporte se actualiza al instante.</p>
+      </div>
+    </header>
+
+    <div class="controls">
+      <div class="group"><span class="label" id="lbl-period">Periodo</span><div class="chips" id="period" role="group" aria-labelledby="lbl-period"></div></div>
+      <div class="group"><span class="label" id="lbl-cat">Categoría</span><div class="chips" id="cats" role="group" aria-labelledby="lbl-cat"></div></div>
+    </div>
+
+    <section class="kpis" aria-label="Indicadores principales">
+      <div class="card kpi"><i>Ventas del periodo</i><b id="k-sales">$0</b><small id="k-sales-d"></small></div>
+      <div class="card kpi"><i>Pedidos</i><b id="k-orders">0</b><small id="k-orders-d"></small></div>
+      <div class="card kpi"><i>Venta promedio</i><b id="k-ticket">$0</b><small>por pedido</small></div>
+      <div class="card kpi"><i>Mejor mes</i><b id="k-best">—</b><small id="k-best-d"></small></div>
+    </section>
+
+    <div class="grid">
+      <section class="card panel" aria-labelledby="chart-title">
+        <div class="panel-head">
+          <div><h2 id="chart-title">Ventas por mes</h2><p id="chart-sub"></p></div>
+          <button class="btn btn-ghost btn-sm" type="button" id="toggle-table" aria-pressed="false">Ver como tabla</button>
+        </div>
+        <div class="chart" id="chart"><div class="tip" id="tip" role="status"></div></div>
+        <div id="table-wrap" hidden></div>
+      </section>
+
+      <section class="card panel" aria-labelledby="rank-title">
+        <div class="panel-head"><div><h2 id="rank-title">Qué se vende más</h2><p>Toca una categoría para filtrar el reporte.</p></div></div>
+        <ul class="rank" id="rank"></ul>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const MONTHS = ['dic', 'ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov'];
+    const FULL = { dic: 'diciembre', ene: 'enero', feb: 'febrero', mar: 'marzo', abr: 'abril', may: 'mayo', jun: 'junio', jul: 'julio', ago: 'agosto', sep: 'septiembre', oct: 'octubre', nov: 'noviembre' };
+    const DATA = {
+      'Cemento': [4200, 3600, 3900, 4500, 4800, 4400, 5100, 5400, 5200, 5800, 6100, 6600],
+      'Pintura': [2100, 2400, 2300, 2800, 3100, 3600, 3300, 3000, 3400, 3200, 3900, 4200],
+      'Tubería': [1800, 1600, 1900, 2100, 2000, 2300, 2500, 2400, 2700, 2600, 2900, 3100],
+      'Herramientas': [2600, 1900, 1700, 2000, 2200, 2100, 2400, 2800, 2600, 3000, 3400, 3900],
+      'Eléctrico': [1500, 1400, 1600, 1700, 1900, 1800, 2000, 2100, 2300, 2200, 2500, 2700],
+    };
+    const CATS = Object.keys(DATA);
+    let period, cat, tableOn;
+
+    const $ = (s) => document.querySelector(s);
+    const money = (n) => '$' + Math.round(n).toLocaleString('es-SV');
+    const pct = (a, b) => (b ? ((a - b) / b) * 100 : 0);
+
+    const monthTotal = (i, c) => (c === 'Todas' ? CATS.reduce((s, k) => s + DATA[k][i], 0) : DATA[c][i]);
+    const monthOrders = (i, c) => Math.max(1, Math.round(monthTotal(i, c) / (82 + (i % 4) * 7)));
+
+    function view() {
+      const end = 12;
+      const start = end - period;
+      const idx = Array.from({ length: period }, (_, k) => start + k);
+      const prev = Array.from({ length: period }, (_, k) => start - period + k).filter((i) => i >= 0);
+      return { idx, prev };
+    }
+
+    function init() { period = 6; cat = 'Todas'; tableOn = false; $('#toggle-table').setAttribute('aria-pressed', 'false'); $('#toggle-table').textContent = 'Ver como tabla'; render(); }
+
+    function renderControls() {
+      $('#period').innerHTML = [3, 6, 12].map((p) => `<button class="chip" type="button" data-p="${p}" aria-pressed="${p === period}">${p} meses</button>`).join('');
+      $('#cats').innerHTML = ['Todas', ...CATS].map((c) => `<button class="chip" type="button" data-c="${c}" aria-pressed="${c === cat}">${c}</button>`).join('');
+    }
+
+    function deltaHtml(v, label) {
+      if (v === null) return '';
+      const cls = Math.abs(v) < 0.5 ? 'flat' : v > 0 ? 'up' : 'down';
+      const arrow = cls === 'flat' ? '→' : v > 0 ? '▲' : '▼';
+      return `<span class="delta ${cls}">${arrow} ${Math.abs(v).toFixed(1).replace('.', ',')} %</span> ${label}`;
+    }
+
+    function renderKpis() {
+      const { idx, prev } = view();
+      const sum = (ix, fn) => ix.reduce((s, i) => s + fn(i, cat), 0);
+      const sales = sum(idx, monthTotal), orders = sum(idx, monthOrders);
+      const hasPrev = prev.length === idx.length;
+      $('#k-sales').textContent = money(sales);
+      $('#k-sales-d').innerHTML = hasPrev ? deltaHtml(pct(sales, sum(prev, monthTotal)), 'vs. periodo anterior') : 'Sin periodo anterior para comparar';
+      $('#k-orders').textContent = orders.toLocaleString('es-SV');
+      $('#k-orders-d').innerHTML = hasPrev ? deltaHtml(pct(orders, sum(prev, monthOrders)), 'vs. periodo anterior') : '';
+      $('#k-ticket').textContent = money(sales / orders);
+      const best = idx.reduce((b, i) => (monthTotal(i, cat) > monthTotal(b, cat) ? i : b), idx[0]);
+      $('#k-best').textContent = MONTHS[best][0].toUpperCase() + MONTHS[best].slice(1);
+      $('#k-best-d').textContent = money(monthTotal(best, cat)) + ' en ventas';
+      $('#chart-sub').textContent = `${cat === 'Todas' ? 'Todas las categorías' : cat} · últimos ${period} meses`;
+    }
+
+    function renderChart() {
+      const el = $('#chart');
+      el.querySelector('svg')?.remove();
+      if (tableOn) return;
+      const { idx } = view();
+      const W = Math.max(280, el.clientWidth), H = 290;
+      const m = { t: 14, r: 8, b: 30, l: 46 };
+      const vals = idx.map((i) => monthTotal(i, cat));
+      const peak = Math.max(...vals);
+      const stepV = [500, 1000, 1500, 2000, 2500, 3000, 4000, 5000, 6000, 8000, 10000].find((s) => s * 4 >= peak) || 10000;
+      const max = stepV * 4;
+      const iw = W - m.l - m.r, ih = H - m.t - m.b;
+      const bw = Math.min(54, (iw / idx.length) * 0.62);
+      const x = (k) => m.l + (iw / idx.length) * (k + 0.5);
+      const y = (v) => m.t + ih - (v / max) * ih;
+      const ticks = [0, 0.25, 0.5, 0.75, 1].map((t) => t * max);
+      const showAll = idx.length <= 6 || W > 520;
+      let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Gráfico de barras de ventas por mes">`;
+      ticks.forEach((t) => { svg += `<line class="grid-line" x1="${m.l}" x2="${W - m.r}" y1="${y(t)}" y2="${y(t)}"/><text x="${m.l - 8}" y="${y(t) + 4}" text-anchor="end">${t >= 1000 ? (t / 1000).toLocaleString('es-SV') + ' mil' : t}</text>`; });
+      idx.forEach((i, k) => {
+        const v = vals[k], h = ih - (y(v) - m.t);
+        const last = k === idx.length - 1;
+        svg += `<rect class="bar ${cat !== 'Todas' ? 'is-cat' : ''} ${last ? 'is-last' : ''}" data-k="${k}" tabindex="0" x="${x(k) - bw / 2}" y="${y(v)}" width="${bw}" height="${h}" rx="6" aria-label="${FULL[MONTHS[i]]}: ${money(v)}"/>`;
+        if (showAll || k % 2 === 0) svg += `<text x="${x(k)}" y="${H - 9}" text-anchor="middle">${MONTHS[i]}</text>`;
+      });
+      svg += '</svg>';
+      el.insertAdjacentHTML('afterbegin', svg);
+      const tip = $('#tip');
+      const show = (rect) => {
+        const k = Number(rect.dataset.k), i = idx[k], v = vals[k];
+        const before = i > 0 ? monthTotal(i - 1, cat) : null;
+        const d = before ? pct(v, before) : null;
+        tip.innerHTML = `<span>${FULL[MONTHS[i]]}</span><b>${money(v)}</b><span>${d === null ? 'Primer mes del año' : (d >= 0 ? '▲ ' : '▼ ') + Math.abs(d).toFixed(1).replace('.', ',') + ' % vs. mes anterior'}</span>`;
+        const box = el.getBoundingClientRect(), r = rect.getBoundingClientRect();
+        tip.style.left = Math.min(Math.max(r.left - box.left + r.width / 2, 80), box.width - 80) + 'px';
+        tip.style.top = r.top - box.top - 8 + 'px';
+        tip.classList.add('is-on');
+      };
+      el.querySelectorAll('.bar').forEach((r) => {
+        r.addEventListener('mouseenter', () => show(r));
+        r.addEventListener('focus', () => show(r));
+        r.addEventListener('mouseleave', () => tip.classList.remove('is-on'));
+        r.addEventListener('blur', () => tip.classList.remove('is-on'));
+      });
+    }
+
+    function renderTable() {
+      const wrap = $('#table-wrap');
+      wrap.hidden = !tableOn;
+      $('#chart').hidden = tableOn;
+      if (!tableOn) return;
+      const { idx } = view();
+      wrap.innerHTML = `<table class="tbl"><thead><tr><th scope="col">Mes</th><th scope="col" class="r">Ventas</th><th scope="col" class="r">Pedidos</th></tr></thead><tbody>${idx.map((i) => `<tr><td>${FULL[MONTHS[i]]}</td><td class="r">${money(monthTotal(i, cat))}</td><td class="r">${monthOrders(i, cat)}</td></tr>`).join('')}</tbody></table>`;
+    }
+
+    function renderRank() {
+      const { idx } = view();
+      const rows = CATS.map((c) => ({ c, v: idx.reduce((s, i) => s + DATA[c][i], 0) })).sort((a, b) => b.v - a.v);
+      const max = rows[0].v;
+      const all = rows.reduce((s, r) => s + r.v, 0);
+      $('#rank').innerHTML = rows.map((r) => `<li><button type="button" data-c="${r.c}" aria-pressed="${r.c === cat}"><span class="row"><b>${r.c}</b><span>${money(r.v)} · ${Math.round((r.v / all) * 100)} %</span></span><span class="track"><i style="width:${(r.v / max) * 100}%"></i></span></button></li>`).join('');
+    }
+
+    function render() { renderControls(); renderKpis(); renderRank(); renderTable(); renderChart(); }
+
+    $('#period').addEventListener('click', (e) => { const b = e.target.closest('[data-p]'); if (b) { period = Number(b.dataset.p); render(); } });
+    const pickCat = (e) => { const b = e.target.closest('[data-c]'); if (b) { cat = cat === b.dataset.c && e.currentTarget.id === 'rank' ? 'Todas' : b.dataset.c; render(); } };
+    $('#cats').addEventListener('click', pickCat);
+    $('#rank').addEventListener('click', pickCat);
+    $('#toggle-table').addEventListener('click', (e) => {
+      tableOn = !tableOn;
+      e.currentTarget.setAttribute('aria-pressed', String(tableOn));
+      e.currentTarget.textContent = tableOn ? 'Ver como gráfico' : 'Ver como tabla';
+      renderTable(); renderChart();
+    });
+    $('#reset').addEventListener('click', init);
+    let rt;
+    new ResizeObserver(() => { clearTimeout(rt); rt = setTimeout(renderChart, 80); }).observe($('#chart'));
+    init();
+  </script>
+</body>
+</html>

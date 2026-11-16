@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Demo · Programa de escritorio | Nexo Digital</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="demo.css" />
+  <style>
+    body { background: #e9ebe4; }
+    .stage { max-width: 1180px; margin: 0 auto; padding: 18px 16px 34px; }
+    .win { display: grid; grid-template-columns: 200px minmax(0, 1fr); min-height: 560px; overflow: hidden; background: var(--paper-bright); border: 1px solid #cfd4cb; border-radius: 14px; box-shadow: 0 26px 70px rgba(20,38,48,.18); }
+    .titlebar { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; background: #dfe3da; border-bottom: 1px solid #cfd4cb; font-size: 12px; font-weight: 600; color: var(--muted); }
+    .titlebar i { width: 11px; height: 11px; border-radius: 50%; background: #c5cabf; }
+    .titlebar span { margin-left: 8px; }
+    .side { display: flex; flex-direction: column; gap: 4px; padding: 16px 12px; color: #cdd8db; background: var(--navy); }
+    .side .brand { display: flex; align-items: center; gap: 10px; padding: 4px 8px 16px; color: white; font-family: var(--font-display); font-weight: 700; }
+    .side .brand b { display: grid; place-items: center; width: 32px; height: 32px; color: var(--navy); background: var(--lime); border-radius: 9px; }
+    .nav { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 40px; padding: 0 12px; color: inherit; background: transparent; border: 0; border-radius: 10px; font-size: 13px; font-weight: 600; text-align: left; transition: background .15s, color .15s; }
+    .nav:hover { background: rgba(255,255,255,.08); }
+    .nav[aria-current="page"] { color: var(--navy); background: var(--lime); }
+    .nav svg { width: 18px; height: 18px; flex: 0 0 18px; }
+    .side-foot { margin-top: auto; padding: 12px; color: #93a5ab; font-size: 11.5px; line-height: 1.45; }
+    .content { display: grid; align-content: start; gap: 18px; padding: 22px 24px 26px; min-width: 0; }
+    .top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; }
+    .top h1 { font-size: clamp(24px, 3.4vw, 32px); }
+    .top p { margin-top: 5px; color: var(--muted); }
+    .add { display: flex; gap: 8px; flex: 1 1 300px; max-width: 440px; }
+    .add .input { flex: 1; min-width: 0; }
+    .board { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; align-items: start; }
+    .col { display: grid; gap: 9px; padding: 10px; background: #eef0ea; border-radius: 14px; min-height: 120px; }
+    .col h2 { display: flex; align-items: center; justify-content: space-between; padding: 4px 4px 2px; font-size: 14px; letter-spacing: -.01em; }
+    .col h2 span { display: grid; place-items: center; min-width: 24px; height: 22px; padding: 0 7px; color: var(--muted); background: white; border-radius: 999px; font-family: var(--font-body); font-size: 11px; font-weight: 700; }
+    .task { display: grid; gap: 8px; padding: 12px; background: white; border: 1px solid var(--line); border-radius: 12px; transition: transform .15s, box-shadow .15s; }
+    .task:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(20,38,48,.08); }
+    .task b { font-weight: 600; line-height: 1.35; }
+    .task small { color: var(--muted); font-size: 12px; }
+    .task-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .tag { display: inline-flex; align-items: center; min-height: 22px; padding: 0 9px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+    .tag-urgent { color: var(--bad); background: var(--bad-soft); }
+    .tag-normal { color: var(--blue); background: var(--blue-soft); }
+    .tag-low { color: var(--muted); background: #ecefe8; }
+    .mv { display: flex; gap: 4px; }
+    .mv button { display: grid; place-items: center; width: 30px; height: 30px; color: var(--navy); background: var(--paper); border: 1px solid var(--line); border-radius: 50%; font-size: 14px; line-height: 1; transition: background .15s, color .15s; }
+    .mv button:hover:not([disabled]) { color: white; background: var(--navy); border-color: var(--navy); }
+    .mv button[disabled] { opacity: .3; cursor: default; }
+    .done-task b { color: var(--muted); text-decoration: line-through; text-decoration-color: rgba(104,116,124,.5); }
+    .progress { display: grid; gap: 6px; padding: 14px 16px; }
+    .progress div { height: 8px; overflow: hidden; background: #e8ebe3; border-radius: 99px; }
+    .progress div i { display: block; height: 100%; background: var(--navy); border-radius: 99px; transition: width .35s ease; }
+    .progress p { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--muted); }
+    .progress p b { color: var(--ink); }
+    .week { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+    .day { display: grid; align-content: start; gap: 8px; min-height: 230px; padding: 12px; background: white; border: 1px solid var(--line); border-radius: 14px; }
+    .day.is-today { border-color: var(--navy); box-shadow: 0 0 0 2px var(--lime); }
+    .day h3 { display: flex; justify-content: space-between; font-size: 14px; }
+    .day h3 small { color: var(--muted); font-family: var(--font-body); font-size: 12px; font-weight: 500; letter-spacing: 0; }
+    .ev { display: flex; align-items: flex-start; gap: 8px; width: 100%; padding: 9px 10px; text-align: left; background: var(--paper); border: 1px solid transparent; border-radius: 10px; font-size: 12.5px; line-height: 1.35; transition: border-color .15s; }
+    .ev:hover { border-color: var(--navy); }
+    .ev i { width: 14px; height: 14px; flex: 0 0 14px; margin-top: 2px; border: 2px solid var(--muted); border-radius: 4px; }
+    .ev.is-done { color: var(--muted); }
+    .ev.is-done i { border-color: var(--ok); background: var(--ok); }
+    .ev.is-done span { text-decoration: line-through; }
+    .ev small { display: block; color: var(--muted); font-size: 11px; }
+    [hidden] { display: none !important; }
+    @media (max-width: 860px) {
+      .win { grid-template-columns: 1fr; }
+      .side { flex-direction: row; flex-wrap: wrap; align-items: center; padding: 10px 12px; }
+      .side .brand { padding: 0 8px 0 4px; }
+      .nav { width: auto; }
+      .side-foot { display: none; }
+      .content { padding: 18px 14px 22px; }
+      .board { grid-template-columns: 1fr; }
+      .week { grid-template-columns: 1fr; }
+      .day { min-height: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="ribbon">
+    <span class="ribbon-dot" aria-hidden="true"></span>
+    <span class="ribbon-text"><b>Demo conceptual.</b> Así se vería un programa instalado en la computadora. Tareas inventadas.</span>
+    <span class="ribbon-actions"><button type="button" id="reset">Reiniciar demo</button></span>
+  </div>
+
+  <div class="stage">
+    <div class="win">
+      <div class="titlebar" aria-hidden="true"><i></i><i></i><i></i><span>Control de trabajo</span></div>
+
+      <aside class="side">
+        <div class="brand"><b>n</b>Mi negocio</div>
+        <button class="nav" type="button" data-view="board" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="10" y="4" width="5" height="10" rx="1.5"/><rect x="17" y="4" width="4" height="13" rx="1.5"/></svg>Trabajos</button>
+        <button class="nav" type="button" data-view="week"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Agenda</button>
+        <p class="side-foot">Los datos se guardan en tu computadora. Con conexión, también pueden sincronizarse con tus registros.</p>
+      </aside>
+
+      <main class="content">
+        <section id="view-board">
+          <div class="top">
+            <div><h1>Trabajos de la semana</h1><p>Mueve cada trabajo con las flechas a medida que avanza.</p></div>
+            <form class="add" id="add-form"><label class="sr-only" for="add-title">Nuevo trabajo</label><input class="input" id="add-title" placeholder="Escribe un trabajo nuevo" autocomplete="off" required /><button class="btn" type="submit">Agregar</button></form>
+          </div>
+          <div class="card progress" style="margin-top:16px"><p><span>Avance de la semana</span><span><b id="pct">0 %</b> · <span id="pct-n"></span></span></p><div><i id="bar" style="width:0"></i></div></div>
+          <div class="board" id="board" style="margin-top:16px"></div>
+        </section>
+
+        <section id="view-week" hidden>
+          <div class="top"><div><h1>Agenda de la semana</h1><p>Marca cada visita o entrega cuando la termines.</p></div></div>
+          <div class="week" id="week" style="margin-top:16px"></div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const COLS = [{ key: 'todo', name: 'Por hacer' }, { key: 'doing', name: 'En curso' }, { key: 'done', name: 'Listo' }];
+    const TAGS = { urgent: ['Urgente', 'tag-urgent'], normal: ['Normal', 'tag-normal'], low: ['Sin prisa', 'tag-low'] };
+    const seedTasks = [
+      ['Cotizar estantes para Casa Verde', 'Hoy', 'urgent', 'todo'],
+      ['Llamar a Taller Los Pinos', 'Hoy', 'normal', 'todo'],
+      ['Pedir madera para 3 muebles', 'Mié', 'normal', 'todo'],
+      ['Revisar inventario de tornillos', 'Vie', 'low', 'todo'],
+      ['Armar escritorio de Sofía', 'Jue', 'urgent', 'doing'],
+      ['Barnizar mesa de Ana', 'Hoy', 'normal', 'doing'],
+      ['Entregar tarimas a Distribuidora Luna', 'Lun', 'normal', 'done'],
+      ['Enviar factura F-0045', 'Lun', 'low', 'done'],
+    ];
+    const seedWeek = [
+      ['Lun', 9, [['Entrega de tarimas', '8:00'], ['Cobro a Café del Parque', '2:00']]],
+      ['Mar', 10, [['Visita: medidas en Casa Verde', '9:30']]],
+      ['Mié', 11, [['Compra de madera', '8:30'], ['Entrega de estante', '3:00']]],
+      ['Jue', 12, [['Armado de escritorio', '9:00']]],
+      ['Vie', 13, [['Revisión de inventario', '10:00'], ['Cierre de semana', '4:00']]],
+    ];
+    let tasks, week, nextId, view = 'board';
+    const $ = (s) => document.querySelector(s);
+    const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+    function init() {
+      tasks = seedTasks.map((t, i) => ({ id: i + 1, title: t[0], when: t[1], prio: t[2], col: t[3] }));
+      week = seedWeek.map((d) => ({ name: d[0], num: d[1], events: d[2].map((e, i) => ({ id: d[0] + i, title: e[0], time: e[1], done: d[1] < 11 })) }));
+      nextId = tasks.length + 1;
+      render();
+    }
+    function toast(msg) { const el = $('#toast'); el.textContent = msg; el.classList.add('is-on'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('is-on'), 2000); }
+
+    function renderBoard() {
+      $('#board').innerHTML = COLS.map((c, ci) => {
+        const items = tasks.filter((t) => t.col === c.key);
+        return `<section class="col" aria-label="${c.name}"><h2>${c.name}<span>${items.length}</span></h2>${items.map((t) => `
+          <article class="task ${c.key === 'done' ? 'done-task' : ''}">
+            <b>${esc(t.title)}</b>
+            <div class="task-row"><span class="tag ${TAGS[t.prio][1]}">${TAGS[t.prio][0]}</span><small>${esc(t.when)}</small></div>
+            <div class="task-row"><div class="mv">
+              <button type="button" data-move="${t.id}" data-dir="-1" aria-label="Mover a ${COLS[ci - 1]?.name ?? ''}" ${ci === 0 ? 'disabled' : ''}>←</button>
+              <button type="button" data-move="${t.id}" data-dir="1" aria-label="Mover a ${COLS[ci + 1]?.name ?? ''}" ${ci === 2 ? 'disabled' : ''}>→</button>
+            </div><button class="btn btn-ghost btn-sm" type="button" data-del="${t.id}" aria-label="Quitar ${esc(t.title)}">Quitar</button></div>
+          </article>`).join('') || '<p style="padding:14px 6px;color:var(--muted);font-size:12.5px">Nada por aquí. Mueve un trabajo a esta columna.</p>'}</section>`;
+      }).join('');
+      const done = tasks.filter((t) => t.col === 'done').length;
+      const pct = tasks.length ? Math.round((done / tasks.length) * 100) : 0;
+      $('#pct').textContent = pct + ' %';
+      $('#pct-n').textContent = `${done} de ${tasks.length} listos`;
+      $('#bar').style.width = pct + '%';
+    }
+
+    function renderWeek() {
+      $('#week').innerHTML = week.map((d) => `
+        <section class="day ${d.num === 11 ? 'is-today' : ''}"><h3>${d.name}<small>${d.num} nov${d.num === 11 ? ' · hoy' : ''}</small></h3>
+        ${d.events.map((e) => `<button class="ev ${e.done ? 'is-done' : ''}" type="button" data-ev="${e.id}" aria-pressed="${e.done}"><i aria-hidden="true"></i><span>${esc(e.title)}<small>${e.time}</small></span></button>`).join('')}</section>`).join('');
+    }
+
+    function render() { renderBoard(); renderWeek(); }
+
+    function setView(v) {
+      view = v;
+      $('#view-board').hidden = v !== 'board';
+      $('#view-week').hidden = v !== 'week';
+      document.querySelectorAll('.nav').forEach((n) => { if (n.dataset.view === v) n.setAttribute('aria-current', 'page'); else n.removeAttribute('aria-current'); });
+    }
+
+    document.querySelectorAll('.nav').forEach((n) => n.addEventListener('click', () => setView(n.dataset.view)));
+    $('#board').addEventListener('click', (e) => {
+      const mv = e.target.closest('[data-move]');
+      const del = e.target.closest('[data-del]');
+      if (mv) {
+        const t = tasks.find((x) => x.id === Number(mv.dataset.move));
+        const i = COLS.findIndex((c) => c.key === t.col) + Number(mv.dataset.dir);
+        if (COLS[i]) { t.col = COLS[i].key; toast(`«${t.title}» → ${COLS[i].name}`); renderBoard(); }
+      }
+      if (del) { tasks = tasks.filter((x) => x.id !== Number(del.dataset.del)); toast('Trabajo quitado'); renderBoard(); }
+    });
+    $('#week').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-ev]');
+      if (!b) return;
+      week.forEach((d) => d.events.forEach((ev) => { if (ev.id === b.dataset.ev) ev.done = !ev.done; }));
+      renderWeek();
+      document.querySelector(`[data-ev="${b.dataset.ev}"]`)?.focus();
+    });
+    $('#add-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = $('#add-title');
+      const title = input.value.trim();
+      if (!title) return;
+      tasks.unshift({ id: nextId++, title, when: 'Hoy', prio: 'normal', col: 'todo' });
+      input.value = '';
+      toast('Trabajo agregado');
+      renderBoard();
+    });
+    $('#reset').addEventListener('click', () => { init(); setView('board'); });
+    init();
+  </script>
+</body>
+</html>

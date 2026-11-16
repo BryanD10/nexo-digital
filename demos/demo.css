@@ -1,0 +1,97 @@
+/* Nexo Digital · base compartida de las demos interactivas */
+:root {
+  --paper: #f5f4ee;
+  --paper-bright: #fbfaf6;
+  --ink: #17212b;
+  --muted: #68747c;
+  --line: #dfe2db;
+  --navy: #142630;
+  --blue: #3856e8;
+  --blue-soft: #e7eaff;
+  --lime: #c8f169;
+  --coral: #f47a5f;
+  --ok: #23724a;
+  --ok-soft: #dcf3e5;
+  --warn: #8a5a0b;
+  --warn-soft: #fdeec4;
+  --bad: #b23a25;
+  --bad-soft: #fde3dc;
+  --font-body: 'DM Sans', 'Segoe UI', sans-serif;
+  --font-display: 'Space Grotesk', 'DM Sans', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body { font-family: var(--font-body); font-size: 14px; line-height: 1.5; color: var(--ink); background: var(--paper); -webkit-font-smoothing: antialiased; }
+h1, h2, h3, h4 { margin: 0; font-family: var(--font-display); letter-spacing: -.03em; line-height: 1.1; }
+p { margin: 0; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--coral); outline-offset: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Cinta superior: deja claro que es una demostración */
+.ribbon { position: sticky; top: 0; z-index: 50; display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 6px 16px; color: #e9efe9; background: var(--navy); font-size: 12px; }
+.ribbon-dot { width: 8px; height: 8px; flex: 0 0 8px; border-radius: 50%; background: var(--lime); }
+.ribbon-text { flex: 1; min-width: 0; }
+.ribbon-text b { color: white; font-weight: 600; }
+.ribbon-actions { display: flex; align-items: center; gap: 8px; }
+.ribbon button { min-height: 28px; padding: 0 12px; color: white; background: transparent; border: 1px solid rgba(255,255,255,.28); border-radius: 999px; font-size: 11px; font-weight: 600; transition: background .15s, color .15s; }
+.ribbon button:hover { color: var(--navy); background: var(--lime); border-color: var(--lime); }
+.ribbon button[aria-pressed="true"] { color: var(--navy); background: var(--lime); border-color: var(--lime); }
+
+/* Botones */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 16px; color: white; background: var(--navy); border: 1px solid var(--navy); border-radius: 999px; font-size: 13px; font-weight: 700; white-space: nowrap; transition: transform .15s, background .15s, color .15s, border-color .15s; }
+.btn:hover { transform: translateY(-1px); background: #0c1a22; }
+.btn:active { transform: translateY(0); }
+.btn-lime { color: var(--navy); background: var(--lime); border-color: var(--lime); }
+.btn-lime:hover { background: #b9e456; }
+.btn-ghost { color: var(--navy); background: white; border-color: var(--line); }
+.btn-ghost:hover { background: var(--paper-bright); border-color: var(--navy); }
+.btn-sm { min-height: 32px; padding: 0 12px; font-size: 12px; }
+.btn[disabled] { opacity: .45; pointer-events: none; }
+
+/* Filtros tipo chip */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { min-height: 32px; padding: 0 13px; color: var(--ink); background: white; border: 1px solid var(--line); border-radius: 999px; font-size: 12px; font-weight: 600; transition: background .15s, color .15s, border-color .15s; }
+.chip:hover { border-color: var(--navy); }
+.chip[aria-pressed="true"] { color: white; background: var(--navy); border-color: var(--navy); }
+.chip .count { margin-left: 6px; color: var(--muted); font-weight: 500; }
+.chip[aria-pressed="true"] .count { color: var(--lime); }
+
+/* Estados */
+.badge { display: inline-flex; align-items: center; gap: 6px; min-height: 24px; padding: 0 10px; border-radius: 999px; font-size: 11px; font-weight: 700; white-space: nowrap; border: 0; }
+.badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.badge-blue { color: var(--blue); background: var(--blue-soft); }
+.badge-warn { color: var(--warn); background: var(--warn-soft); }
+.badge-ok { color: var(--ok); background: var(--ok-soft); }
+.badge-bad { color: var(--bad); background: var(--bad-soft); }
+button.badge { cursor: pointer; transition: transform .15s; }
+button.badge:hover { transform: translateY(-1px); }
+
+/* Tarjetas, campos y tablas */
+.card { background: white; border: 1px solid var(--line); border-radius: 18px; }
+.field { display: grid; gap: 6px; font-size: 12px; font-weight: 600; color: var(--muted); }
+.input { width: 100%; min-height: 42px; padding: 0 14px; color: var(--ink); background: white; border: 1px solid var(--line); border-radius: 12px; font-size: 14px; font-weight: 400; transition: border-color .15s, box-shadow .15s; }
+textarea.input { padding: 11px 14px; min-height: 90px; resize: vertical; }
+.input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-soft); }
+.input::placeholder { color: #9aa4a9; }
+.kpi { display: grid; gap: 4px; padding: 16px 18px; }
+.kpi i { color: var(--muted); font-size: 12px; font-style: normal; font-weight: 600; }
+.kpi b { font-family: var(--font-display); font-size: 30px; line-height: 1; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+.kpi small { color: var(--muted); font-size: 11.5px; }
+.empty { display: grid; gap: 4px; padding: 38px 20px; text-align: center; color: var(--muted); }
+.empty b { color: var(--ink); font-family: var(--font-display); font-size: 17px; letter-spacing: -.02em; }
+
+.toast { position: fixed; left: 50%; bottom: 18px; z-index: 60; transform: translate(-50%, 20px); max-width: calc(100% - 28px); padding: 11px 18px; color: white; background: var(--navy); border-radius: 999px; font-size: 13px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; }
+.toast.is-on { opacity: 1; transform: translate(-50%, 0); }
+
+dialog.sheet { width: min(460px, calc(100% - 28px)); padding: 0; color: var(--ink); background: var(--paper-bright); border: 1px solid var(--line); border-radius: 22px; box-shadow: 0 24px 80px rgba(12,24,32,.35); }
+dialog.sheet::backdrop { background: rgba(9,20,28,.55); backdrop-filter: blur(3px); }
+dialog.sheet form { display: grid; gap: 14px; padding: 22px; }
+dialog.sheet h2 { font-size: 24px; }
+.sheet-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
