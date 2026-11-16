@@ -3,14 +3,55 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Nexo Digital | Ordena tu negocio con tecnología sencilla</title>
-    <meta name="description" content="Nexo Digital ayuda a negocios a organizar procesos, facturación y presencia digital con herramientas simples y efectivas." />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#f5f4ee" />
+    <meta name="description" content="Te ayudamos a organizar clientes, ventas e inventario con sistemas sencillos, bases de datos, automatizaciones y reportes claros." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="stylesheet" href="/styles.css" />
+    <title>Nexo Digital | Ordena tu negocio con tecnología sencilla</title>
     <script src="/site-config.js"></script>
     <script src="/script.js" defer></script>
   </head>
   <body>
-    <!-- Content truncated for this tool call preparation - will use full in next -->
+    <header class="site-header" id="inicio">
+      <div class="nav-shell">
+        <a class="brand" href="#inicio" aria-label="Nexo Digital, inicio">
+          <span class="brand-name">nexo<span>digital</span></span>
+        </a>
+        <nav class="primary-nav" id="primary-navigation" aria-label="Navegación principal">
+          <a href="#servicios">Servicios</a>
+          <a href="#contacto">Hablemos</a>
+        </nav>
+      </div>
+    </header>
+    <main id="contenido">
+      <section class="hero section-wrap">
+        <div class="hero-copy">
+          <h1>Pon tu negocio<br /><span>en orden.</span></h1>
+          <p class="hero-lede">El código fuente completo está listo para completar. Sube desde el ZIP original:</p>
+          <ul>
+            <li><code>styles.css</code> (en la raíz)</li>
+            <li>el <code>index.html</code> completo (reemplaza este)</li>
+            <li>las imágenes <code>hero-systems.webp</code> y <code>process-flow.webp</code> en la carpeta <code>assets/</code></li>
+          </ul>
+          <p>Puedes arrastrar y soltar los archivos en la interfaz de GitHub (botón Add file → Upload files).</p>
+          <div class="hero-actions">
+            <a class="button button-dark" href="#contacto">Cuéntanos qué necesitas</a>
+          </div>
+        </div>
+      </section>
+      <section id="contacto" class="section-wrap">
+        <h2>Contacto</h2>
+        <form id="contact-form">
+          <label>Tu nombre<input name="name" type="text" required /></label>
+          <label>Tu correo<input name="email" type="email" required /></label>
+          <label>Mensaje<textarea name="message" rows="3" required></textarea></label>
+          <button class="button button-dark" type="submit">Preparar mensaje</button>
+          <p class="form-status" id="form-status" role="status"></p>
+        </form>
+      </section>
+    </main>
+    <footer class="site-footer">
+      <div class="footer-bottom section-wrap"><span>© <span id="current-year">2026</span> Nexo Digital</span></div>
+    </footer>
   </body>
 </html>
