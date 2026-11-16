@@ -67,4 +67,83 @@
       status.textContent = 'Aún falta configurar el correo o WhatsApp de recepción del negocio; tu solicitud no se ha enviado.';
     });
   }
+
+  const projectModal = document.querySelector('#project-modal');
+  const projectModalPreview = document.querySelector('#project-modal-preview');
+  const modalTitle = document.querySelector('#project-modal-title');
+  const modalType = document.querySelector('#project-modal-type');
+  const modalDescription = document.querySelector('#project-modal-description');
+  const modalClose = document.querySelector('.project-modal-close');
+
+  if (projectModal && projectModalPreview && modalTitle && modalType && modalDescription) {
+    document.querySelectorAll('.project-card').forEach((card) => {
+      const copy = card.querySelector('.project-copy');
+      const preview = card.querySelector('.project-preview');
+      const title = copy?.querySelector('h3')?.textContent.trim();
+      if (!copy || !preview || !title || copy.querySelector('.preview-open')) return;
+
+      const openButton = document.createElement('button');
+      openButton.className = 'preview-open';
+      openButton.type = 'button';
+      openButton.textContent = 'Ampliar vista previa';
+      openButton.setAttribute('aria-label', `Ampliar vista previa: ${title}`);
+      copy.append(openButton);
+
+      openButton.addEventListener('click', () => {
+        modalTitle.textContent = title;
+        modalType.textContent = copy.querySelector('.project-type')?.textContent.trim() || 'VISTA PREVIA';
+        modalDescription.textContent = copy.querySelector('p')?.textContent.trim() || '';
+        projectModalPreview.replaceChildren(preview.cloneNode(true));
+        projectModal.showModal();
+      });
+    });
+
+    modalClose?.addEventListener('click', () => projectModal.close());
+    projectModal.addEventListener('click', (event) => {
+      if (event.target === projectModal) projectModal.close();
+    });
+    projectModal.addEventListener('close', () => projectModalPreview.replaceChildren());
+  }
+
+  const assistantWidget = document.querySelector('#assistant-widget');
+  const assistantToggle = document.querySelector('#assistant-launch');
+  const assistantPanel = document.querySelector('#assistant-panel');
+  const assistantClose = document.querySelector('.assistant-close');
+  const serviceSelect = document.querySelector('#contact-service');
+
+  if (assistantWidget && assistantToggle && assistantPanel) {
+    const setAssistantOpen = (open, returnFocus = false) => {
+      assistantPanel.hidden = !open;
+      assistantToggle.setAttribute('aria-expanded', String(open));
+      assistantToggle.setAttribute('aria-label', open
+        ? 'Cerrar asistente Nexo'
+        : 'Abrir asistente Nexo: ayuda rápida para elegir un servicio');
+      if (open) assistantPanel.querySelector('.assistant-options button')?.focus();
+      else if (returnFocus) assistantToggle.focus();
+    };
+
+    assistantToggle.addEventListener('click', () => {
+      setAssistantOpen(assistantPanel.hidden);
+    });
+    assistantClose?.addEventListener('click', () => setAssistantOpen(false, true));
+
+    assistantPanel.querySelectorAll('[data-service]').forEach((option) => {
+      option.addEventListener('click', () => {
+        if (serviceSelect) {
+          serviceSelect.value = option.dataset.service;
+          serviceSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        setAssistantOpen(false);
+        document.querySelector('#contacto')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        window.setTimeout(() => serviceSelect?.focus({ preventScroll: true }), 450);
+      });
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!assistantPanel.hidden && !assistantWidget.contains(event.target)) setAssistantOpen(false);
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !assistantPanel.hidden) setAssistantOpen(false, true);
+    });
+  }
 })();

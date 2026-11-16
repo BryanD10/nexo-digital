@@ -1,7 +1,5 @@
 # Assets
 
-Sube aquí las imágenes del ZIP:
-- hero-systems.webp
-- process-flow.webp
+Las ilustraciones `hero-systems.webp` y `process-flow.webp` se usan en el sitio y ya están incluidas en esta carpeta.
 
-Puedes arrastrarlas desde la interfaz de GitHub (Add file → Upload files).
+Guarda aquí las capturas de proyectos que quieras agregar como previsualizaciones. Usa imágenes autorizadas y evita datos privados de clientes.

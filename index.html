@@ -13,15 +13,15 @@
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="Nexo Digital | Ordena tu negocio con tecnología sencilla" />
     <meta name="twitter:description" content="Registra clientes, ventas e inventario, reduce tareas repetidas y entiende tus números con reportes claros." />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="preload" as="image" href="/assets/hero-systems.webp" />
-    <link rel="stylesheet" href="/styles.css" />
+    <link rel="preload" as="image" href="assets/hero-systems.webp" />
+    <link rel="stylesheet" href="styles.css" />
     <title>Nexo Digital | Ordena tu negocio con tecnología sencilla</title>
-    <script src="/site-config.js"></script>
-    <script src="/script.js" defer></script>
+    <script src="site-config.js"></script>
+    <script src="script.js" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#contenido">Saltar al contenido</a>
@@ -66,7 +66,7 @@
 
         <div class="hero-art" aria-label="Ilustración de soluciones digitales conectadas">
           <div class="art-halo"></div>
-          <img class="hero-image" src="/assets/hero-systems.webp" alt="Ilustración de herramientas digitales para organizar un negocio" fetchpriority="high" />
+          <img class="hero-image" src="assets/hero-systems.webp" alt="Ilustración de herramientas digitales para organizar un negocio" fetchpriority="high" />
           <div class="floating-chip chip-top"><span class="chip-symbol">↗</span><span>Todo conecta</span></div>
           <div class="floating-chip chip-bottom"><span class="chip-status"></span><span>Hecho a tu medida</span></div>
           <span class="art-sticker" aria-hidden="true">ND<span>+</span></span>
@@ -219,7 +219,7 @@
             <a class="button button-lime" href="#contacto">Empezar una conversación <span aria-hidden="true">↗</span></a>
           </div>
           <div class="process-visual">
-            <img src="/assets/process-flow.webp" alt="Ilustración de un proceso de trabajo organizado paso a paso" loading="lazy" />
+            <img src="assets/process-flow.webp" alt="Ilustración de un proceso de trabajo organizado paso a paso" loading="lazy" />
             <div class="visual-caption"><span class="caption-star">✳</span><span>De una buena idea<br /><b>a un proceso más claro.</b></span></div>
           </div>
         </div>
@@ -253,7 +253,7 @@
               <label>Tu correo<input name="email" type="email" autocomplete="email" placeholder="nombre@correo.com" required /></label>
             </div>
             <label>¿Qué te gustaría mejorar?
-              <select name="service" required>
+              <select id="contact-service" name="service" required>
                 <option value="" selected disabled>Selecciona una opción</option>
                 <option>Página web</option>
                 <option>Automatización</option>
@@ -272,6 +272,42 @@
         </div>
       </section>
     </main>
+
+    <dialog class="project-modal" id="project-modal" aria-labelledby="project-modal-title">
+      <div class="project-modal-shell">
+        <div class="project-modal-top"><span class="project-modal-kicker">VISTA PREVIA</span><button class="project-modal-close" type="button" aria-label="Cerrar vista previa" autofocus>×</button></div>
+        <div class="project-modal-preview" id="project-modal-preview"></div>
+        <div class="project-modal-copy"><span class="project-type" id="project-modal-type"></span><h2 id="project-modal-title"></h2><p id="project-modal-description"></p></div>
+      </div>
+    </dialog>
+
+    <div class="assistant-widget" id="assistant-widget">
+      <section class="assistant-panel" id="assistant-panel" aria-labelledby="assistant-title" hidden>
+        <div class="assistant-panel-heading">
+          <span class="assistant-live-dot" aria-hidden="true"></span>
+          <div><h2 id="assistant-title">Asistente Nexo</h2><p>Atajos para encontrar una opción</p></div>
+          <button class="assistant-close" type="button" aria-label="Cerrar el asistente">×</button>
+        </div>
+        <p class="assistant-prompt">¿Qué te gustaría mejorar en tu negocio?</p>
+        <div class="assistant-options">
+          <button type="button" data-service="Registrar clientes, ventas o inventario">Ordenar ventas o inventario <span aria-hidden="true">↗</span></button>
+          <button type="button" data-service="Ver reportes de ventas o inventario (Power BI o similar)">Ver mis números <span aria-hidden="true">↗</span></button>
+          <button type="button" data-service="Automatización">Ahorrar tareas repetidas <span aria-hidden="true">↗</span></button>
+        </div>
+        <p class="assistant-note">Es un menú de ayuda rápida, no un chat automatizado.</p>
+      </section>
+      <button class="assistant-launch" id="assistant-launch" type="button" aria-expanded="false" aria-controls="assistant-panel" aria-label="Abrir asistente Nexo: ayuda rápida para elegir un servicio">
+        <span class="robot-avatar" aria-hidden="true">
+          <span class="robot-antenna"><i></i></span>
+          <span class="robot-head"><span class="robot-side"></span><span class="robot-face"><i></i><i></i><b></b></span></span>
+          <span class="robot-neck"></span>
+          <span class="robot-body"><i></i></span>
+          <span class="robot-shadow"></span>
+        </span>
+        <span class="assistant-launch-copy"><strong>¿Te ayudo?</strong><small>Elige por dónde empezar</small></span>
+        <span class="assistant-launch-arrow" aria-hidden="true">↑</span>
+      </button>
+    </div>
 
     <footer class="site-footer">
       <div class="footer-main section-wrap">
