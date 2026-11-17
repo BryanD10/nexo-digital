@@ -1,7 +1,8 @@
-/* Configura aquí un canal real antes de publicar el sitio. No inventes una dirección o número.
- * Usa contactEmail para abrir un borrador de correo, o whatsappNumber con código de país y dígitos.
+/* Canales de contacto del formulario.
+ * whatsappNumber: código de país + número, solo dígitos (El Salvador = 503). Es el canal principal.
+ * contactEmail: se usa como alternativa si no hay WhatsApp o no se puede abrir.
  */
 window.NEXO_CONFIG = {
-  contactEmail: '',
-  whatsappNumber: '',
+  whatsappNumber: '50373039172',
+  contactEmail: 'bryandiaz2414@gmail.com',
 };

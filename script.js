@@ -50,16 +50,17 @@
         message,
       ].join('\n');
 
-      if (businessEmail) {
-        window.location.href = `mailto:${encodeURIComponent(businessEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-        status.textContent = 'Se preparó tu correo. Revisa tu aplicación de email para enviarlo.';
-        return;
-      }
-
       if (whatsappNumber) {
         const whatsappText = `${subject}\n\n${body}`;
         window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappText)}`, '_blank', 'noopener,noreferrer');
-        status.textContent = 'Se abrió WhatsApp con los detalles de tu solicitud.';
+        const fallback = businessEmail ? ` Si no se abrió, escríbenos a ${businessEmail}.` : '';
+        status.textContent = `Se abrió WhatsApp con los detalles de tu solicitud.${fallback}`;
+        return;
+      }
+
+      if (businessEmail) {
+        window.location.href = `mailto:${businessEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        status.textContent = 'Se preparó tu correo. Revisa tu aplicación de email para enviarlo.';
         return;
       }
 

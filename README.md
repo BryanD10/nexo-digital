@@ -52,25 +52,16 @@ Cada demo tiene en su cinta superior el botón **Quiero algo así**: dentro del 
 
 ## Configurar el contacto
 
-Edita `site-config.js` con **un solo** canal real. Para correo:
+Edita `site-config.js`:
 
 ```js
 window.NEXO_CONFIG = {
+  whatsappNumber: '50373039172', // código de país + número, solo dígitos
   contactEmail: 'tucorreo@tudominio.com',
-  whatsappNumber: '',
 };
 ```
 
-O para WhatsApp (prefijo internacional y solo dígitos):
-
-```js
-window.NEXO_CONFIG = {
-  contactEmail: '',
-  whatsappNumber: '5215512345678',
-};
-```
-
-El formulario abre un borrador de correo o WhatsApp; no guarda solicitudes en una base de datos.
+El formulario abre **WhatsApp** con el mensaje ya escrito. Si no hay número, abre un borrador de **correo**. Si no hay ninguno de los dos, muestra un aviso y no envía nada.
 
 ## Abrir en local
 
