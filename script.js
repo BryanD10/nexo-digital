@@ -37,62 +37,36 @@
       const name = String(formData.get('name') || '').trim();
       const email = String(formData.get('email') || '').trim();
       const service = String(formData.get('service') || '').trim();
+      const packageChoice = String(formData.get('package') || '').trim();
       const message = String(formData.get('message') || '').trim();
       const businessEmail = String(config.contactEmail || '').trim();
       const whatsappNumber = String(config.whatsappNumber || '').replace(/\D/g, '');
-      const subject = `Consulta para Nexo Digital: ${service}`;
+      const subject = `Consulta para Nexo Digital: ${service}${packageChoice ? ` — ${packageChoice}` : ''}`;
       const body = [
         `Nombre: ${name}`,
         `Correo: ${email}`,
         `Servicio de interés: ${service}`,
+        ...(packageChoice ? [`Paquete de interés: ${packageChoice}`] : []),
         '',
         'Mensaje:',
         message,
       ].join('\n');
 
-      if (whatsappNumber) {
-        const whatsappText = `${subject}\n\n${body}`;
-        window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappText)}`, '_blank', 'noopener,noreferrer');
-        const fallback = businessEmail ? ` Si no se abrió, escríbenos a ${businessEmail}.` : '';
-        status.textContent = `Se abrió WhatsApp con los detalles de tu solicitud.${fallback}`;
+      if (businessEmail) {
+        window.location.href = `mailto:${encodeURIComponent(businessEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        status.textContent = 'Se preparó tu correo. Revisa tu aplicación de email para enviarlo.';
         return;
       }
 
-      if (businessEmail) {
-        window.location.href = `mailto:${businessEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-        status.textContent = 'Se preparó tu correo. Revisa tu aplicación de email para enviarlo.';
+      if (whatsappNumber) {
+        const whatsappText = `${subject}\n\n${body}`;
+        window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappText)}`, '_blank', 'noopener,noreferrer');
+        status.textContent = 'Se abrió WhatsApp con los detalles de tu solicitud.';
         return;
       }
 
       status.classList.add('is-error');
       status.textContent = 'Aún falta configurar el correo o WhatsApp de recepción del negocio; tu solicitud no se ha enviado.';
-    });
-  }
-
-  const demoModal = document.querySelector('#demo-modal');
-  const demoFrame = document.querySelector('#demo-frame');
-  const demoTitle = document.querySelector('#demo-modal-title');
-  const demoNewTab = document.querySelector('#demo-newtab');
-  let demoOpener = null;
-
-  function openDemo(src, title, opener) {
-    if (!demoModal || !demoFrame) return;
-    demoOpener = opener;
-    demoTitle.textContent = title;
-    demoFrame.title = `Demo interactiva: ${title}`;
-    demoFrame.src = src;
-    if (demoNewTab) demoNewTab.href = src;
-    demoModal.showModal();
-  }
-
-  if (demoModal) {
-    document.querySelector('#demo-close')?.addEventListener('click', () => demoModal.close());
-    demoModal.addEventListener('click', (event) => {
-      if (event.target === demoModal) demoModal.close();
-    });
-    demoModal.addEventListener('close', () => {
-      demoFrame.src = 'about:blank';
-      demoOpener?.focus();
     });
   }
 
@@ -104,6 +78,48 @@
   const modalClose = document.querySelector('.project-modal-close');
 
   if (projectModal && projectModalPreview && modalTitle && modalType && modalDescription) {
+    const demoLibrary = window.NEXO_PROJECT_DEMOS || {};
+    const initializeDemoTabs = () => {
+      const root = projectModalPreview.querySelector('.demo-project');
+      if (!root) return;
+      root.querySelectorAll('[role="tab"][data-demo-tab]').forEach((tab) => {
+        const name = tab.dataset.demoTab;
+        const screen = root.querySelector(`[data-demo-screen="${name}"]`);
+        if (!screen) return;
+        tab.id = `${name}-tab`;
+        tab.setAttribute('aria-controls', `${name}-panel`);
+        screen.id = `${name}-panel`;
+        screen.setAttribute('aria-labelledby', tab.id);
+        screen.setAttribute('role', 'tabpanel');
+        screen.hidden = tab.getAttribute('aria-selected') !== 'true';
+      });
+    };
+    const syncDemoTabOrientation = () => {
+      const mobile = window.innerWidth <= 760;
+      projectModalPreview.querySelectorAll('[role="tablist"]').forEach((tablist) => {
+        const horizontal = mobile || tablist.classList.contains('demo-web-tabs');
+        tablist.setAttribute('aria-orientation', horizontal ? 'horizontal' : 'vertical');
+      });
+    };
+    window.addEventListener('resize', syncDemoTabOrientation);
+    const activateDemoTab = (button) => {
+      const root = button.closest('.demo-project');
+      const name = button.dataset.demoTab;
+      if (!root || !name) return;
+      const selectedTab = root.querySelector(`[role="tab"][data-demo-tab="${name}"]`);
+      const selectedScreen = root.querySelector(`[data-demo-screen="${name}"]`);
+      if (!selectedTab || !selectedScreen) return;
+      root.querySelectorAll('[role="tab"][data-demo-tab]').forEach((tab) => {
+        const selected = tab === selectedTab;
+        tab.setAttribute('aria-selected', String(selected));
+        tab.tabIndex = selected ? 0 : -1;
+      });
+      root.querySelectorAll('[data-demo-screen]').forEach((screen) => {
+        screen.hidden = screen === selectedScreen ? false : true;
+      });
+      selectedTab.focus({ preventScroll: true });
+    };
+
     document.querySelectorAll('.project-card').forEach((card) => {
       const copy = card.querySelector('.project-copy');
       const preview = card.querySelector('.project-preview');
@@ -115,27 +131,88 @@
       openButton.type = 'button';
       openButton.textContent = 'Ampliar vista previa';
       openButton.setAttribute('aria-label', `Ampliar vista previa: ${title}`);
-      const actions = document.createElement('div');
-      actions.className = 'project-actions';
-      if (card.dataset.demo) {
-        const demoButton = document.createElement('button');
-        demoButton.className = 'demo-open';
-        demoButton.type = 'button';
-        demoButton.textContent = 'Probar demo';
-        demoButton.setAttribute('aria-label', `Probar la demo interactiva: ${title}`);
-        demoButton.addEventListener('click', () => openDemo(card.dataset.demo, title, demoButton));
-        actions.append(demoButton);
-      }
-      actions.append(openButton);
-      copy.append(actions);
+      copy.append(openButton);
 
       openButton.addEventListener('click', () => {
+        const demo = demoLibrary[card.dataset.projectDemo];
         modalTitle.textContent = title;
         modalType.textContent = copy.querySelector('.project-type')?.textContent.trim() || 'VISTA PREVIA';
-        modalDescription.textContent = copy.querySelector('p')?.textContent.trim() || '';
-        projectModalPreview.replaceChildren(preview.cloneNode(true));
+        modalDescription.textContent = demo?.description || copy.querySelector('p')?.textContent.trim() || '';
+        if (demo?.markup) {
+          projectModalPreview.innerHTML = demo.markup;
+          initializeDemoTabs();
+          syncDemoTabOrientation();
+        } else {
+          projectModalPreview.replaceChildren(preview.cloneNode(true));
+        }
         projectModal.showModal();
       });
+    });
+
+    projectModalPreview.addEventListener('click', (event) => {
+      const target = event.target instanceof Element ? event.target : null;
+      const requestedTab = target?.closest('[data-demo-tab]');
+      if (requestedTab && projectModalPreview.contains(requestedTab)) {
+        activateDemoTab(requestedTab);
+        return;
+      }
+
+      const contactButton = target?.closest('[data-demo-action="contact"]');
+      if (contactButton) {
+        const service = contactButton.closest('.demo-project')?.dataset.demoService;
+        projectModal.close();
+        if (serviceSelect) {
+          const optionExists = Array.from(serviceSelect.options).some((option) => option.value === service);
+          serviceSelect.value = optionExists ? service : 'Necesito orientación';
+          serviceSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        document.querySelector('#contacto')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        window.setTimeout(() => serviceSelect?.focus({ preventScroll: true }), 450);
+      }
+    });
+
+    projectModalPreview.addEventListener('keydown', (event) => {
+      const currentTab = event.target instanceof Element
+        ? event.target.closest('[role="tab"][data-demo-tab]')
+        : null;
+      if (!currentTab) return;
+      const root = currentTab.closest('.demo-project');
+      const orientation = currentTab.closest('[role="tablist"]')?.getAttribute('aria-orientation');
+      const tabs = Array.from(root?.querySelectorAll('[role="tab"][data-demo-tab]') || []);
+      const index = tabs.indexOf(currentTab);
+      if (index < 0) return;
+      let nextIndex = index;
+      if ((orientation === 'vertical' && event.key === 'ArrowDown') || (orientation !== 'vertical' && event.key === 'ArrowRight')) nextIndex = (index + 1) % tabs.length;
+      else if ((orientation === 'vertical' && event.key === 'ArrowUp') || (orientation !== 'vertical' && event.key === 'ArrowLeft')) nextIndex = (index - 1 + tabs.length) % tabs.length;
+      else if (event.key === 'Home') nextIndex = 0;
+      else if (event.key === 'End') nextIndex = tabs.length - 1;
+      else return;
+      event.preventDefault();
+      activateDemoTab(tabs[nextIndex]);
+    });
+
+    projectModalPreview.addEventListener('input', (event) => {
+      const input = event.target instanceof Element ? event.target.closest('[data-demo-filter]') : null;
+      if (!input) return;
+      const screen = input.closest('[data-demo-screen]');
+      if (!screen) return;
+      const query = input.value.trim().toLocaleLowerCase('es');
+      const rows = Array.from(screen.querySelectorAll('[data-demo-row], .demo-client-card'));
+      let visibleRows = 0;
+      rows.forEach((row) => {
+        const searchable = `${row.dataset.demoSearch || ''} ${row.textContent || ''}`.toLocaleLowerCase('es');
+        row.hidden = Boolean(query) && !searchable.includes(query);
+        if (!row.hidden) visibleRows += 1;
+      });
+      let emptyState = screen.querySelector('.demo-search-empty');
+      if (!emptyState) {
+        emptyState = document.createElement('p');
+        emptyState.className = 'demo-search-empty';
+        emptyState.setAttribute('role', 'status');
+        emptyState.textContent = 'No encontramos registros con esa búsqueda.';
+        screen.append(emptyState);
+      }
+      emptyState.hidden = !query || visibleRows > 0;
     });
 
     modalClose?.addEventListener('click', () => projectModal.close());
@@ -150,6 +227,16 @@
   const assistantPanel = document.querySelector('#assistant-panel');
   const assistantClose = document.querySelector('.assistant-close');
   const serviceSelect = document.querySelector('#contact-service');
+  const packageSelect = document.querySelector('#contact-package');
+
+  document.querySelectorAll('[data-package-choice]').forEach((link) => {
+    link.addEventListener('click', () => {
+      const choice = link.dataset.packageChoice || '';
+      if (packageSelect) packageSelect.value = choice;
+      if (serviceSelect) serviceSelect.value = 'Página web';
+      window.setTimeout(() => packageSelect?.focus({ preventScroll: true }), 450);
+    });
+  });
 
   if (assistantWidget && assistantToggle && assistantPanel) {
     const setAssistantOpen = (open, returnFocus = false) => {
@@ -186,27 +273,4 @@
       if (event.key === 'Escape' && !assistantPanel.hidden) setAssistantOpen(false, true);
     });
   }
-
-  const contactSelect = document.querySelector('#contact-service');
-  const hasService = (value) => Boolean(contactSelect) && Array.from(contactSelect.options).some((option) => option.value === value);
-  const preselectService = (value) => {
-    if (!hasService(value)) return;
-    contactSelect.value = value;
-    contactSelect.dispatchEvent(new Event('change', { bubbles: true }));
-  };
-
-  window.addEventListener('message', (event) => {
-    if (!demoFrame || event.source !== demoFrame.contentWindow) return;
-    if (event.origin !== window.location.origin) return;
-    const data = event.data;
-    if (!data || data.type !== 'nexo-demo-cta') return;
-
-    demoOpener = null;
-    demoModal?.close();
-    preselectService(String(data.service || ''));
-    document.querySelector('#contacto')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    window.setTimeout(() => contactSelect?.focus({ preventScroll: true }), 450);
-  });
-
-  preselectService(new URLSearchParams(window.location.search).get('servicio') || '');
 })();
