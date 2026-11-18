@@ -1,0 +1,18 @@
+PANADERÍA ARTESANAL · V7 NAVIDAD
+
+CÓMO USAR
+1) Extrae este ZIP.
+2) Abre index.html desde la carpeta PANADERIA_V7_NAVIDAD (no muevas por separado el HTML).
+3) Para publicar en un hosting, sube todo el contenido de la carpeta conservando sus rutas.
+
+QUÉ CAMBIÓ
+- 3 fotografías navideñas nuevas, distintas, en el carrusel de portada.
+- Los 3 botones dirigen a Temporada o Catálogo.
+- La sección de Temporada luce textos y detalles navideños.
+- No se modificaron los 34 productos, imágenes de producto, precios, controles, filtros ni el carrito.
+- Las fotos navideñas originales se conservaron en PNG de 1672 x 941.
+
+POR CONFIGURAR
+- Número de WhatsApp (no se modificó; usuario lo hará después).
+- Nombre real de panadería y datos de sucursales, si aplica.
+- Revisión de correspondencia de la foto de Empanada de leche.

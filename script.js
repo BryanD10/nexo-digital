@@ -39,6 +39,7 @@
       const service = String(formData.get('service') || '').trim();
       const packageChoice = String(formData.get('package') || '').trim();
       const message = String(formData.get('message') || '').trim();
+      if (!name || !email || !service || !message) { status.classList.add('is-error'); status.textContent='Completa los campos con datos válidos.'; return; }
       const businessEmail = String(config.contactEmail || '').trim();
       const whatsappNumber = String(config.whatsappNumber || '').replace(/\D/g, '');
       const subject = `Consulta para Nexo Digital: ${service}${packageChoice ? ` — ${packageChoice}` : ''}`;
@@ -52,16 +53,14 @@
         message,
       ].join('\n');
 
+      if (whatsappNumber) {
+        window.open('https://wa.me/'+whatsappNumber+'?text='+encodeURIComponent(subject+'\n\n'+body), '_blank', 'noopener,noreferrer');
+        status.textContent = 'Se preparó tu solicitud en WhatsApp. Revisa el mensaje y pulsa Enviar allí.';
+        return;
+      }
       if (businessEmail) {
         window.location.href = `mailto:${encodeURIComponent(businessEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
         status.textContent = 'Se preparó tu correo. Revisa tu aplicación de email para enviarlo.';
-        return;
-      }
-
-      if (whatsappNumber) {
-        const whatsappText = `${subject}\n\n${body}`;
-        window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappText)}`, '_blank', 'noopener,noreferrer');
-        status.textContent = 'Se abrió WhatsApp con los detalles de tu solicitud.';
         return;
       }
 
@@ -158,7 +157,7 @@
       const monthOutput = root.querySelector('[data-demo-analytics-month-output]');
       if (monthOutput) monthOutput.textContent = `${point.dataset.month} · ${point.dataset.note || 'muestra'}`;
     };
-    const formatMareaPrice = (amount) => `$ ${new Intl.NumberFormat('es-MX', { maximumFractionDigits: 0 }).format(amount)} MXN`;
+    const formatMareaPrice = amount => new Intl.NumberFormat('es-SV', {style:'currency', currency:'USD'}).format(amount)+' USD';
     const updateMareaEstimate = (root) => {
       const output = root?.querySelector('[data-demo-hotel-estimate]');
       if (!output) return;
@@ -183,7 +182,7 @@
       const copy = card.querySelector('.project-copy');
       const preview = card.querySelector('.project-preview');
       const title = copy?.querySelector('h3')?.textContent.trim();
-      if (!copy || !preview || !title || copy.querySelector('.preview-open')) return;
+      if (!copy || !title || (!preview && !demoLibrary[card.dataset.projectDemo]?.markup) || copy.querySelector('.preview-open')) return;
 
       const openButton = document.createElement('button');
       openButton.className = 'preview-open';
@@ -245,7 +244,7 @@
         const root = roomButton.closest('.demo-project');
         const roomName = roomButton.dataset.demoRoomSelect || 'Habitación de muestra';
         if (!root) return;
-        root.dataset.selectedRoom = roomName;
+        root.dataset.selectedRoom = roomName;const guestSelect=root.querySelector('[data-demo-hotel-guests]');const capacity=Number(roomButton.dataset.demoRoomCapacity)||2;if(guestSelect){const prior=Number(guestSelect.value)||2;guestSelect.innerHTML=Array.from({length:capacity},(_,i)=>'<option '+(i+1===Math.min(prior,capacity)?'selected':'')+'>'+(i+1)+'</option>').join('');}
         root.querySelectorAll('[data-demo-room-select]').forEach((button) => {
           const selected = button === roomButton;
           button.setAttribute('aria-pressed', String(selected));
@@ -405,6 +404,7 @@
       if (contactButton) {
         const service = contactButton.closest('.demo-project')?.dataset.demoService;
         projectModal.close();
+        if (!serviceSelect) { window.location.href = 'contacto.html?servicio=' + encodeURIComponent(service || 'Necesito orientación') + '#contacto'; return; }
         if (serviceSelect) {
           const optionExists = Array.from(serviceSelect.options).some((option) => option.value === service);
           serviceSelect.value = optionExists ? service : 'Necesito orientación';
@@ -524,6 +524,18 @@
   const serviceSelect = document.querySelector('#contact-service');
   const packageSelect = document.querySelector('#contact-package');
   const contactMessage = document.querySelector('#contact-form [name="message"]');
+
+
+  if (serviceSelect && packageSelect) {
+    const params = new URLSearchParams(window.location.search);
+    const selectedPackage = params.get('paquete');
+    const requestedService = params.get('servicio');
+    const requestedSystem = params.get('sistema');
+    if (requestedSystem && contactMessage) contactMessage.value = 'Me interesa ' + requestedSystem.slice(0,80) + '. Quisiera adaptarlo a mi negocio.';
+    if (selectedPackage && Array.from(packageSelect.options).some(o => o.value === selectedPackage)) { packageSelect.value = selectedPackage; serviceSelect.value = 'Página web'; }
+    if (requestedService && Array.from(serviceSelect.options).some(o => o.value === requestedService)) serviceSelect.value = requestedService;
+    try { const draft = JSON.parse(sessionStorage.getItem('nexo-contact-draft') || 'null'); if (draft && contactMessage) { contactMessage.value = String(draft.message || '').slice(0,1800); if (!selectedPackage && Array.from(serviceSelect.options).some(o => o.value === draft.service)) serviceSelect.value = draft.service; sessionStorage.removeItem('nexo-contact-draft'); } } catch {}
+  }
 
   document.querySelectorAll('[data-package-choice]').forEach((link) => {
     link.addEventListener('click', () => {
@@ -733,6 +745,11 @@
         return;
       }
       if (target?.closest('[data-assistant-use-summary]')) {
+        if (!contactMessage) {
+          try { sessionStorage.setItem('nexo-contact-draft', JSON.stringify({service: assistantState.service, message: assistantState.summary})); } catch {}
+          window.location.href = 'contacto.html?servicio=' + encodeURIComponent(assistantState.service) + '#contacto';
+          return;
+        }
         if (serviceSelect) {
           const optionExists = Array.from(serviceSelect.options).some((option) => option.value === assistantState.service);
           serviceSelect.value = optionExists ? assistantState.service : 'Necesito orientación';

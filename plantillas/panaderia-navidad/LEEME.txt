@@ -1,0 +1,9 @@
+PANADERÍA ARTESANAL - V6 FOTOS UNICAS
+
+Extrae todo el ZIP en una misma carpeta.
+Abre index.html, que mostrará V6 · Fotos nuevas junto al logo.
+No abras archivos anteriores V2, V3, V4 ni V5.
+Las imágenes están en la carpeta imagenes/ y NO deben separarse del index.html.
+Los 34 productos conservan sus IDs, categorías, precios y carrito.
+La conexión de WhatsApp sigue pendiente.
+La foto del producto Empanada de leche requiere confirmación visual.
